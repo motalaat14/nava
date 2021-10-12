@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:nava/helpers/constants/DioBase.dart';
-import 'package:nava/helpers/constants/MyColors.dart';
-import 'package:nava/helpers/customs/Badge.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Loading.dart';
-
+import 'package:nava/helpers/models/AboutModel.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../res.dart';
 
 class AboutUs extends StatefulWidget {
   @override
@@ -31,49 +33,50 @@ class _AboutUsState extends State<AboutUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffold,
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("about"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              elevation: 0,
+              title: Text(tr("about"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
+                    ),
+                  ),
+                )
+              ],
+            ),
+            AppBarFoot(),
+          ],
         ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        actions: [
-          // InkWell(
-          //   onTap: () {
-          //     Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-          //   },
-          //   child: Padding(
-          //     padding: const EdgeInsets.symmetric(horizontal: 10),
-          //     child: Badge(
-          //         value: "3",
-          //         color: MyColors.red,
-          //         child: IconButton(
-          //           icon: Icon(
-          //             Icons.notifications,
-          //             color: MyColors.offPrimary,
-          //             size: 28,
-          //           ),
-          //           onPressed: () {
-          //             Navigator.push(context,
-          //                 MaterialPageRoute(builder: (c) => Notifications()));
-          //           },
-          //         )),
-          //   ),
-          // ),
-        ],
       ),
+
 
       body:
           loading ?
               MyLoading()
               : Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15),
+            padding: const EdgeInsets.symmetric(vertical: 15,horizontal: 15),
             child: Column(
               children: [
                 Text(
-                  desc,
+                  aboutModel.data.desc,
                   style: TextStyle(
                     fontSize: 15,
                   ),
@@ -90,21 +93,28 @@ class _AboutUsState extends State<AboutUs> {
 
 
   bool loading =true;
-  DioBase dioBase = DioBase();
+  AboutModel aboutModel = AboutModel();
   Future getAbout() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Map<String, String> headers = {
-      "Authorization": "Bearer ${preferences.getString("token")}"
-    };
-    dioBase.get("sidePages?type=aboutUs", headers: headers).then((response) {
-      if (response.data["key"] == "success") {
-        setState(() {loading=false;});
-        desc = response.data["data"]["aboutUs"];
-      } else {
-        print("------------------------else");
-        Fluttertoast.showToast(msg: response.data["msg"]);
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/about");
+    try {
+      final response = await http.get(url,
+        // body: {"lang":preferences.getString("lang")},
+        headers: {"lang":preferences.getString("lang")}
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() =>loading=false);
+        print(responseData);
+        if(responseData["key"]=="success"){
+          aboutModel=AboutModel.fromJson(responseData);
+        }else{
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
       }
-    });
+    } catch (e) {
+      print("fail 222222222   $e}" );
+    }
   }
 
 

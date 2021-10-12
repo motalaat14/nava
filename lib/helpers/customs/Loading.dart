@@ -13,8 +13,8 @@ class MyLoading extends StatelessWidget {
         children: [
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 30),
-              child: SpinKitDualRing(color: MyColors.accent, size: 30.0)),
-          Text(tr("loading")),
+              child: SpinKitDoubleBounce(color: MyColors.primary, size: 25.0)),
+          Text(tr("loading"),style: TextStyle(fontSize: 14),),
         ],
       ),
     );

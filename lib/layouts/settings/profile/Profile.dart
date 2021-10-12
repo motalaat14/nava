@@ -1,9 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Badge.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/RichTextFiled.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
+
+import '../../../res.dart';
+import 'change_password.dart';
 
 class Profile extends StatefulWidget {
   final String name,phone,email,img;
@@ -20,7 +25,6 @@ class _ProfileState extends State<Profile> {
   TextEditingController name=new TextEditingController();
   TextEditingController phone=new TextEditingController();
   TextEditingController mail=new TextEditingController();
-  TextEditingController bank=new TextEditingController();
   String img;
 
   initInfo(){
@@ -41,132 +45,134 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       key: _scaffold,
       backgroundColor: MyColors.secondary,
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("profile"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        actions: [
-          InkWell(
-            onTap: (){
-              // Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Badge(
-                  value: "3",
-                  color: MyColors.red,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.notifications,
-                      color: MyColors.offPrimary,
-                      size: 28,
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              elevation: 0,
+              title: Text(tr("profile"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
                     ),
-                    onPressed: () {
-                      // Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));
-                    },
-                  )),
+                  ),
+                )
+              ],
             ),
-          ),
-        ],
+            AppBarFoot(),
+          ],
+        ),
       ),
-      body: ListView(
-        padding: EdgeInsets.only(top: 10),
-        children: [
-          Center(
-            child: Stack(
+      body: Padding(
+        padding: EdgeInsets.only(top: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
               children: [
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: MyColors.primary.withOpacity(.2),
-                    borderRadius: BorderRadius.circular(100),
-                    border:Border.all(width: 2,color: MyColors.primary),
-                    image: DecorationImage(image: NetworkImage(img))
+                Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 110,
+                        height: 110,
+                        decoration: BoxDecoration(
+                            color: MyColors.primary.withOpacity(.2),
+                            borderRadius: BorderRadius.circular(100),
+                            border:Border.all(width: 2,color: MyColors.primary),
+                            image: DecorationImage(image: NetworkImage(img))
+                        ),
+                      ),
+                      Container(
+                        width: 30,
+                        height:30,
+                        decoration: BoxDecoration(
+                            color: MyColors.primary,
+                            borderRadius: BorderRadius.circular(50),
+                            border:Border.all(width: 1,color: MyColors.primary)
+                        ),
+                        child: Icon(Icons.camera_alt_outlined,size: 20,color: MyColors.white,),
+                      ),
+                    ],
                   ),
                 ),
-                Container(
-                  width: 30,
-                  height:30,
-                  decoration: BoxDecoration(
-                      color: MyColors.primary,
-                      borderRadius: BorderRadius.circular(50),
-                      border:Border.all(width: 1,color: MyColors.primary)
+                Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr("name"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                        RichTextFiled(
+                          controller: name,
+                          label: tr("name"),
+                          type: TextInputType.emailAddress,
+                          margin: EdgeInsets.only(top: 8,bottom: 10),
+                          action: TextInputAction.next,
+                        ),
+                        Text(tr("mail"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                        RichTextFiled(
+                          controller: mail,
+                          label: tr("mail"),
+                          type: TextInputType.emailAddress,
+                          margin: EdgeInsets.only(top: 8,bottom: 10),
+                          action: TextInputAction.next,
+                        ),
+                        Text(tr("phone"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                        RichTextFiled(
+                          controller: phone,
+                          label: tr("phone"),
+                          type: TextInputType.emailAddress,
+                          margin: EdgeInsets.only(top: 8,bottom: 10),
+                          action: TextInputAction.next,
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Icon(Icons.camera_alt_outlined,size: 20,color: MyColors.white,),
                 ),
               ],
             ),
-          ),
-
-          Form(
-            key: _formKey,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr("name"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                  RichTextFiled(
-                    controller: name,
-                    label: tr("name"),
-                    type: TextInputType.emailAddress,
-                    margin: EdgeInsets.only(top: 8,bottom: 10),
-                    action: TextInputAction.next,
+                  CustomButton(
+                    title: tr("changePass"),
+                    textColor: MyColors.primary,
+                    margin: EdgeInsets.symmetric(vertical: 0),
+                    color: MyColors.white,
+                    borderColor: MyColors.primary,
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (c)=>ChangePassword()));
+                    },
                   ),
-                  Text(tr("mail"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                  RichTextFiled(
-                    controller: mail,
-                    label: tr("mail"),
-                    type: TextInputType.emailAddress,
-                    margin: EdgeInsets.only(top: 8,bottom: 10),
-                    action: TextInputAction.next,
-                  ),
-                  Text(tr("phone"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                  RichTextFiled(
-                    controller: phone,
-                    label: tr("phone"),
-                    type: TextInputType.emailAddress,
-                    margin: EdgeInsets.only(top: 8,bottom: 10),
-                    action: TextInputAction.next,
-                  ),
-                  Text(tr("bankNum"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                  RichTextFiled(
-                    controller: phone,
-                    label: tr("bankNum"),
-                    type: TextInputType.emailAddress,
-                    margin: EdgeInsets.only(top: 8,bottom: 10),
-                    action: TextInputAction.next,
-                  ),
-                  // Spacer(),
-                  // CustomButton(
-                  //   title: tr("changePass"),
-                  //   textColor: MyColors.primary,
-                  //   margin: EdgeInsets.symmetric(vertical: 15),
-                  //   color: MyColors.white,
-                  //   borderColor: MyColors.primary,
-                  //   onTap: (){
-                  //     Navigator.push(context, MaterialPageRoute(builder: (c)=>ChangePassword()));
-                  //   },
-                  // ),
-
                   CustomButton(
                     title: tr("saveChanges"),
-                    margin: EdgeInsets.symmetric(vertical: 20),
+                    margin: EdgeInsets.symmetric(vertical: 10),
                     onTap: (){
                       Navigator.pop(context);
                     },
                   ),
-
                 ],
               ),
             ),
-          ),
-
-        ],
+          ],
+        ),
       ),
     );
   }

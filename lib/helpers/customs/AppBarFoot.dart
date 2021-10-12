@@ -6,7 +6,7 @@ class AppBarFoot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      height: 15,
+      height: 10,
       decoration: BoxDecoration(
         color: MyColors.primary,
         borderRadius: BorderRadius.only(

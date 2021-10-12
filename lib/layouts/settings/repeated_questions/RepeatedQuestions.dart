@@ -6,82 +6,87 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/FQsModel.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart'as http;
 
-class RepeatedQuestions extends StatefulWidget{
+import '../../../res.dart';
+
+class FQs extends StatefulWidget{
 
   @override
   State<StatefulWidget> createState() {
-    return _RepeatedQuestionsState();
+    return _FQsState();
   }
 }
-class _RepeatedQuestionsState extends State<RepeatedQuestions>{
+class _FQsState extends State<FQs>{
 
 
   @override
   void initState(){
-    // getFQs();
+    getFQs();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("popQuestions"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              elevation: 0,
+              title: Text(tr("about"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
+                    ),
+                  ),
+                )
+              ],
+            ),
+            AppBarFoot(),
+          ],
         ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        actions: [
-          // InkWell(
-          //   onTap: () {
-          //     Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-          //   },
-          //   child: Padding(
-          //     padding: const EdgeInsets.symmetric(horizontal: 10),
-          //     child: Badge(
-          //         value: "3",
-          //         color: MyColors.red,
-          //         child: IconButton(
-          //           icon: Icon(
-          //             Icons.notifications,
-          //             color: MyColors.offPrimary,
-          //             size: 28,
-          //           ),
-          //           onPressed: () {
-          //             Navigator.push(context,
-          //                 MaterialPageRoute(builder: (c) => Notifications()));
-          //           },
-          //         )),
-          //   ),
-          // ),
-        ],
       ),
-
 
       body: Column(
         children: [
-          // loading ? Expanded(child: MyLoading()) :
+          loading ? Expanded(child: MyLoading()) :
           Container(
             height: MediaQuery.of(context).size.height-115,
             child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: 6,
+                itemCount: fQsModel.data.length,
                 itemBuilder: (c,i){
                   return InkWell(
                     onTap: (){
                       setState(() {
-                        // fQsModel.data.fqs[i].open = !fQsModel.data.fqs[i].open;
+                        fQsModel.data[i].open = !fQsModel.data[i].open;
                       });
                     },
                     child: questionItem(
-                      question: "fQsModel.data.fqs[i].question",
-                      answer: "fQsModel.data.fqs[i].answer",
-                      open: true,
+                      question: fQsModel.data[i].question,
+                      answer: fQsModel.data[i].answer,
+                      open: fQsModel.data[i].open,
                     ),
                   );
                 },
@@ -138,29 +143,29 @@ class _RepeatedQuestionsState extends State<RepeatedQuestions>{
     );
   }
 
-
-
-
-  // bool loading =true;
-  // FQsModel fQsModel = FQsModel();
-  // DioBase dioBase = DioBase();
-  // Future getFQs() async {
-  //   SharedPreferences preferences = await SharedPreferences.getInstance();
-  //   Map<String, String> headers = {
-  //     "Authorization": "Bearer ${preferences.getString("token")}"
-  //   };
-  //   dioBase.get("sidePages?type=fqs", headers: headers).then((response) {
-  //     if (response.data["key"] == "success") {
-  //       setState(() {loading=false;});
-  //       // fQsModel = FQsModel.fromJson(response.data);
-  //     } else {
-  //       EasyLoading.dismiss();
-  //       print("------------------------else");
-  //       Fluttertoast.showToast(msg: response.data["msg"]);
-  //     }
-  //   });
-  // }
-
+  bool loading = true;
+  FQsModel fQsModel = FQsModel();
+  Future getFQs() async {
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/questions");
+    try {
+      final response = await http.get(url,
+        headers: {"lang":preferences.getString("lang")},
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() =>loading=false);
+        print(responseData);
+        if(responseData["key"]=="success"){
+          fQsModel=FQsModel.fromJson(responseData);
+        }else{
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e) {
+      print("fail 222222222   $e}" );
+    }
+  }
 
 
 }

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
@@ -34,6 +35,8 @@ class _RegisterState extends State<Register> {
   TextEditingController pass=new TextEditingController();
   TextEditingController pass2=new TextEditingController();
   bool terms = false;
+  bool pass01 = true;
+  bool pass02 = true;
 
   @override
   Widget build(BuildContext context) {
@@ -103,19 +106,20 @@ class _RegisterState extends State<Register> {
                         ),
                         RichTextFiled(
                           controller: pass,
+                          pass: pass01,
                           label: tr("password"),
                           type: TextInputType.text,
                           margin: EdgeInsets.only(top: 15,),
-                          icon: Icon(Icons.visibility_rounded,color: MyColors.grey.withOpacity(.6),),
+                          icon: IconButton(icon:Icon(Icons.visibility_rounded),color: MyColors.grey.withOpacity(.6), onPressed: (){setState(() {pass01=!pass01;});},),
                         ),
                         RichTextFiled(
+                          pass: pass02,
                           controller: pass2,
                           label: tr("confirmPassword"),
                           type: TextInputType.text,
                           margin: EdgeInsets.only(top: 15,),
-                          icon: Icon(Icons.visibility_rounded,color: MyColors.grey.withOpacity(.6),),
+                          icon: IconButton(icon:Icon(Icons.visibility_rounded),color: MyColors.grey.withOpacity(.6), onPressed: (){setState(() {pass02=!pass02;});},),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.only(top: 15),
                           child: Row(
@@ -139,6 +143,11 @@ class _RegisterState extends State<Register> {
                           ),
                         ),
 
+                        loading?
+                        Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 30),
+                            child: SpinKitDoubleBounce(color: MyColors.accent, size: 30.0))
+                            :
                         CustomButton(
                           title: tr("register"),
                           margin: EdgeInsets.symmetric(vertical: 24),
@@ -154,7 +163,6 @@ class _RegisterState extends State<Register> {
                             }
                           },
                         ),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -173,7 +181,6 @@ class _RegisterState extends State<Register> {
                             ),
                           ],
                         ),
-
                         CustomButton(
                           title: tr("login"),
                           color: MyColors.secondary,
@@ -184,7 +191,6 @@ class _RegisterState extends State<Register> {
                             Navigator.push(context, MaterialPageRoute(builder: (context)=>Login()));
                           },
                         ),
-
 
                       ],
                     ),
@@ -199,11 +205,56 @@ class _RegisterState extends State<Register> {
   }
 
 
+
+
+
+  bool loading=false;
   Future register() async {
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    print("========> login00");
+    setState(()=>loading=true);
+    final url = Uri.https(URL, "api/user/sign-up");
+    print("========> login01");
+    try {
+      print("========> login02");
+      final response = await http.post(url,
+        body: {
+          "name":"${name.text}",
+          "phone": "${phone.text}",
+          "password": "${pass.text}",
+          "password_confirmation": "${pass.text}",
+          "email": "${mail.text}",
+          "lang":preferences.getString("lang"),
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      print("========> login03");
+      final responseData = json.decode(response.body);
+      print("========> login04");
+      if (response.statusCode == 200) {
+        print("========> login05");
+        setState(()=>loading=false);
+        print(responseData);
+        if(responseData["key"]=="success"){
+          Fluttertoast.showToast(msg: tr("loginSuccessPlzActive"));
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>ActiveAccount(phone: phone.text,code: responseData["data"]["active_code"],)), (route) => false,);
+        }else{
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e,t) {
+      print("========> login09");
+      print("error : $e ,,,, track : $t");
+    }
+  }
+
+
+
+
+  Future register1() async {
     SharedPreferences preferences =await SharedPreferences.getInstance();
     print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyy sign-up");
     LoadingDialog.showLoadingDialog();
-    final url = Uri.https(URL, "api/client_sign_up");
+    final url = Uri.https(URL, "api/user/sign-up");
     print("yyyyyyyyyyyyyyyyyyyyyyyyyyyyy sign-up 111");
     try {
       final response = await http.post(url,

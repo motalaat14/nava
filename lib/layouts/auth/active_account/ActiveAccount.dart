@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
@@ -105,11 +108,20 @@ class _ActiveAccountState extends State<ActiveAccount> {
                 ),
 
 
+                loading?
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
+                    child: SpinKitDoubleBounce(color: MyColors.accent, size: 30.0))
+                    :
                 CustomButton(
                   title: tr("confirm"),
                   margin: EdgeInsets.symmetric(horizontal: 0, vertical: 30),
                   onTap: (){
-                    activeAccount();
+                    if(code.text!=""){
+                      activeAccount();
+                    }else{
+                      Fluttertoast.showToast(msg: tr("plzEnterCode"),);
+                    }
                   },
                 ),
 
@@ -153,38 +165,72 @@ class _ActiveAccountState extends State<ActiveAccount> {
     }
   }
 
+
+  bool loading=false;
+  DioBase dioBase = DioBase();
   Future activeAccount() async {
-    SharedPreferences preferences =await SharedPreferences.getInstance();
-    print("========> activeAccount");
-    LoadingDialog.showLoadingDialog();
-    final url = Uri.https(URL, "api/user_activation");
-    try {
-      final response = await http.post(url,
-        body: {
-          "uuid":"$uuid",
-          "phone": "${widget.phone}",
-          "active_code": "${code.text}",
-          "device_id": preferences.getString("fcmToken"),
-          "device_type": Platform.isIOS ?"ios":"android",
-          "lang":preferences.getString("lang"),
-        },
-      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
-      final responseData = json.decode(response.body);
+    setState(()=>loading=true);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    FormData bodyData = FormData.fromMap({
+      "lang":preferences.getString("lang"),
+      "phone": "${widget.phone}",
+      "code": "${code.text}",
+      "device_id": preferences.getString("fcmToken")==null??widget.phone,
+      "device_type": Platform.isIOS ?"ios":"android",
+      "uuid":"$uuid",
+    });
+    dioBase.post("active-code", body: bodyData,)
+        .then((response) {
       if (response.statusCode == 200) {
-        EasyLoading.dismiss();
-        print(responseData);
-        if(responseData["key"]=="success"){
+        print("========> login05");
+        setState(() => loading = false);
+        if (response.data["key"] == "success") {
           Fluttertoast.showToast(msg: tr("registerSuc"));
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Login()), (route) => false,);
-        }else{
-          Fluttertoast.showToast(msg: responseData["msg"]);
+        }else {
+          print("========> login08");
+          Fluttertoast.showToast(msg: response.data["msg"]);
         }
       }
-    } catch (e) {
-      EasyLoading.dismiss();
-      print("fail 222222222   $e}" );
-    }
+    });
   }
+
+
+
+
+
+  // Future activeAccount() async {
+  //   SharedPreferences preferences =await SharedPreferences.getInstance();
+  //   print("========> activeAccount");
+  //   LoadingDialog.showLoadingDialog();
+  //   final url = Uri.https(URL, "api/active-code");
+  //   try {
+  //     final response = await http.post(url,
+  //       body: {
+  //         "uuid":"$uuid",
+  //         "phone": "${widget.phone}",
+  //         "active_code": "${code.text}",
+  //         "device_id": preferences.getString("fcmToken"),
+  //         "device_type": Platform.isIOS ?"ios":"android",
+  //         "lang":preferences.getString("lang"),
+  //       },
+  //     ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+  //     final responseData = json.decode(response.body);
+  //     if (response.statusCode == 200) {
+  //       EasyLoading.dismiss();
+  //       print(responseData);
+  //       if(responseData["key"]=="success"){
+  //         Fluttertoast.showToast(msg: tr("registerSuc"));
+  //         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Login()), (route) => false,);
+  //       }else{
+  //         Fluttertoast.showToast(msg: responseData["msg"]);
+  //       }
+  //     }
+  //   } catch (e) {
+  //     EasyLoading.dismiss();
+  //     print("fail 222222222   $e}" );
+  //   }
+  // }
 
   Future resendCode() async {
     SharedPreferences preferences =await SharedPreferences.getInstance();

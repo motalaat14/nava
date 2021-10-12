@@ -35,7 +35,7 @@ class _LabelTextFieldState extends State<LabelTextField> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
             minHeight: 45,
-            maxHeight: 100,
+            maxHeight: 200,
             minWidth: widget.minWidth??double.infinity,
             maxWidth: widget.maxWidth??double.infinity
         ),
@@ -50,7 +50,7 @@ class _LabelTextFieldState extends State<LabelTextField> {
           onChanged: widget.onChange,
           enableSuggestions: false,
           autocorrect: false,
-          textInputAction: widget.action?? TextInputAction.next,
+          textInputAction: widget.action?? TextInputAction.done,
           style: GoogleFonts.almarai(fontSize: 16,color: Colors.black),
           validator: (value)=> widget.validate(value),
           decoration: InputDecoration(

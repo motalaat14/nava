@@ -6,6 +6,7 @@ import 'package:nava/layouts/Home/orders/Orders.dart';
 // import 'package:nava/layouts/Home/settings/Settings.dart';
 import 'package:nava/layouts/Home/wallet/Wallet.dart';
 import 'package:nava/layouts/settings/Settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   final int index;
@@ -17,7 +18,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   @override
   void initState() {
     // TODO: implement initState
@@ -27,9 +27,7 @@ class _HomeState extends State<Home> {
         Main(),
         Orders(),
         Wallet(),
-        Settings(
-
-        ),
+        Settings(),
       ];
     });
     whichPage();

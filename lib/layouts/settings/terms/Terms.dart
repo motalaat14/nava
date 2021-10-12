@@ -6,9 +6,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Badge.dart';
 import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/TermsModel.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../res.dart';
 
 class Terms extends StatefulWidget {
   final String from;
@@ -34,39 +40,39 @@ class _TermsState extends State<Terms> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("terms"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        actions: [
-          widget.from == "register"
-              ? Container()
-              : InkWell(
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              elevation: 0,
+              title: Text(tr("terms"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              actions: [
+                InkWell(
                   onTap: () {
-                    // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Badge(
-                        value: "3",
-                        color: MyColors.red,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.notifications,
-                            color: MyColors.offPrimary,
-                            size: 28,
-                          ),
-                          onPressed: () {
-                            // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-                          },
-                        )),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
+                    ),
                   ),
-                ),
-        ],
+                )
+              ],
+            ),
+            AppBarFoot(),
+          ],
+        ),
       ),
+
       key: _scaffold,
       body: loading
           ? MyLoading()
@@ -76,7 +82,7 @@ class _TermsState extends State<Terms> {
               child: Column(
                 children: [
                   Text(
-                    desc,
+                    termsModel.data.desc,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -89,24 +95,50 @@ class _TermsState extends State<Terms> {
   }
 
   bool loading = true;
-  DioBase dioBase = DioBase();
+  TermsModel termsModel = TermsModel();
   Future getTerms() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    Map<String, String> headers = {
-      "Authorization": "Bearer ${preferences.getString("token")}"
-    };
-    dioBase
-        .get("sidePages?type=termsConditions", headers: headers)
-        .then((response) {
-      if (response.data["key"] == "success") {
-        setState(() {
-          loading = false;
-        });
-        desc = response.data["data"]["termsConditions"];
-      } else {
-        print("------------------------else");
-        Fluttertoast.showToast(msg: response.data["msg"]);
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    print("========> login");
+    print(preferences.getString("fcmToken"));
+    final url = Uri.https(URL, "api/policy");
+    try {
+      final response = await http.post(url,
+        body: {"lang":preferences.getString("lang")},
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() =>loading=false);
+        print(responseData);
+        if(responseData["key"]=="success"){
+          termsModel=TermsModel.fromJson(responseData);
+        }else{
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
       }
-    });
+    } catch (e) {
+      print("fail 222222222   $e}" );
+    }
   }
+
+
+  // DioBase dioBase = DioBase();
+  // Future getTerms() async {
+  //   SharedPreferences preferences = await SharedPreferences.getInstance();
+  //   Map<String, String> headers = {
+  //     "Authorization": "Bearer ${preferences.getString("token")}"
+  //   };
+  //   dioBase
+  //       .get("policy", headers: headers)
+  //       .then((response) {
+  //     if (response.data["key"] == "success") {
+  //       setState(() {
+  //         loading = false;
+  //       });
+  //       desc = response.data["data"]["termsConditions"];
+  //     } else {
+  //       print("------------------------else");
+  //       Fluttertoast.showToast(msg: response.data["msg"]);
+  //     }
+  //   });
+  // }
 }

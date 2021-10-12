@@ -15,6 +15,7 @@ class RichTextFiled extends StatelessWidget{
   final Color fillColor;
   final Color labelColor;
   final bool readOnly;
+  final bool pass;
   final TextInputAction action;
   final Function(String value) submit;
   final Widget icon;
@@ -29,7 +30,7 @@ class RichTextFiled extends StatelessWidget{
     this.readOnly=false,
     this.action,
     this.submit,
-    this.icon, this.labelColor
+    this.icon, this.labelColor, this.pass
   });
 
 
@@ -39,12 +40,13 @@ class RichTextFiled extends StatelessWidget{
       height: height,
       margin: margin,
       child: TextFormField(
+        obscureText: pass==null?false:pass,
         controller: controller,
         keyboardType: type??TextInputType.multiline,
         textInputAction: action?? TextInputAction.done,
         onFieldSubmitted: submit,
-        minLines: min,
-        maxLines: max,
+        // minLines: min,
+        // maxLines: max,
         readOnly: readOnly,
         style: GoogleFonts.almarai(fontSize:20,color: MyColors.primary),
         validator: (value)=> validate(value),
@@ -69,7 +71,7 @@ class RichTextFiled extends StatelessWidget{
             errorStyle: GoogleFonts.almarai(fontSize: 14),
             labelText: " $label ",
             alignLabelWithHint: true,
-            labelStyle: GoogleFonts.almarai(fontSize: 15,color:labelColor ?? MyColors.accent),
+            labelStyle: GoogleFonts.almarai(fontSize: 15,color:labelColor ?? MyColors.grey),
             fillColor: fillColor?? MyColors.white,
             contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             filled: true,

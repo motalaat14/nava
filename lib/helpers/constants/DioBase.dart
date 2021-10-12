@@ -12,7 +12,8 @@ class DioBase {
 
   // String base_url = "https://lbitak.com/api/";
   // String baseUrl = "https://ewsaly.co/api/";
-  String baseUrl = "https://navaapp.net/api/";
+  // String baseUrl = "https://navaapp.net/api/";
+  String baseUrl = "https://navaservices.net/api/";
 
 
   Dio dio = Dio();

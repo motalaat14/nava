@@ -3,13 +3,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'helpers/constants/MyColors.dart';
+import 'helpers/providers/FcmTokenProvider.dart';
+import 'helpers/providers/UserProvider.dart';
 import 'layouts/Home/Home.dart';
 import 'layouts/auth/splash/Splash.dart';
 
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
   runApp(EasyLocalization(
     child: MyApp(),
     supportedLocales: [Locale('ar', 'EG'), Locale('en', 'US')],
@@ -22,22 +25,28 @@ class MyApp extends StatelessWidget {
   final navigatorKey = new GlobalKey<NavigatorState>();
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      title: 'Nava',
-      theme: ThemeData(
-        primaryColor: MyColors.primary,
-        fontFamily: GoogleFonts.almarai().fontFamily,
-      ),
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      home:
-      // Splash(navigatorKey: navigatorKey,),
-      Home(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FcmTokenProvider()),
+        ChangeNotifierProvider(create: (context) => UserProvider())
+      ],
+      child: MaterialApp(
+        navigatorKey: navigatorKey,
+        debugShowCheckedModeBanner: false,
+        title: 'Nava',
+        theme: ThemeData(
+          primaryColor: MyColors.primary,
+          fontFamily: GoogleFonts.almarai().fontFamily,
+        ),
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        home:
+        Splash(navigatorKey: navigatorKey,),
+        // Home(),
 
-      builder: EasyLoading.init(),
+        builder: EasyLoading.init(),
+      ),
     );
   }
 }

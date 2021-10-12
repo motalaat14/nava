@@ -1,8 +1,12 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:device_info/device_info.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:nava/helpers/GlobalNotification.dart';
+import 'package:nava/layouts/Home/Home.dart';
 import 'package:nava/layouts/auth/select_lang/SelectLang.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../res.dart';
@@ -21,10 +25,28 @@ class _SplashState extends State<Splash> {
 
   @override
   void initState() {
-    // GlobalNotification.instance.setupNotification(widget.navigatorKey);
+    GlobalNotification.instance.setupNotification(widget.navigatorKey);
     _splashTimer();
+    getUuid();
     super.initState();
   }
+
+  String uuid;
+  void getUuid()async{
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    print("uuid get token >>>> ${preferences.getString("fcmToken")}");
+    final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+    if(Platform.isAndroid){
+      var build = await deviceInfoPlugin.androidInfo;
+      uuid = build.androidId;
+      preferences.setString("uuid", uuid);
+    }else if(Platform.isIOS){
+      var data = await deviceInfoPlugin.iosInfo;
+      uuid = data.identifierForVendor;
+      preferences.setString("uuid", uuid);
+    }
+  }
+
 
   Future<Timer> _splashTimer() async {
     return new Timer(Duration(seconds: 2), _goToApp);
@@ -44,7 +66,7 @@ class _SplashState extends State<Splash> {
       print("---------------- user id == ${preferences.getString("userId")}");
       print("---------------- token == ${preferences.getString("token")}");
       print("---------------- fcmToken == ${preferences.getString("fcmToken")}");
-      // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
     }else{
       changeLanguage("ar",context);
       print("---------------- user id == ${preferences.getString("userId")}");

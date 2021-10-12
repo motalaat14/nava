@@ -6,13 +6,13 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mdi/mdi.dart';
-import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
-import 'package:nava/helpers/customs/Badge.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
-import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/customs/LabelTextField.dart';
 import 'package:nava/helpers/customs/RichTextFiled.dart';
+import 'package:nava/helpers/models/ContactModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -33,20 +33,22 @@ class _ContactUsState extends State<ContactUs> {
 
   @override
   void initState() {
-    // getContact();
+    getContact();
     super.initState();
   }
 
 
-
+  bool isLoading = false;
   Future contactUs() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     print("------------ contactUs ------------");
-    LoadingDialog.showLoadingDialog();
-    final url = Uri.https(URL, "api/sendComplain");
+    setState(()=>isLoading=true);
+    final url = Uri.https(URL, "api/contact-us");
     try {
-      final response = await http.post(url, headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
+          "lang":preferences.getString("lang"),
           "name": _name.text,
           "email": _mail.text,
           "message": _msg.text,
@@ -54,7 +56,7 @@ class _ContactUsState extends State<ContactUs> {
       ).timeout(Duration(seconds: 7), onTimeout: () {throw 'no internet please connect to internet';});
       final responseData = json.decode(response.body);
       if (response.statusCode == 200) {
-        EasyLoading.dismiss();
+        setState(()=>isLoading=false);
         print(responseData);
         if (responseData["key"] == "success") {
           print("------------ success ------------");
@@ -63,8 +65,10 @@ class _ContactUsState extends State<ContactUs> {
           Fluttertoast.showToast(msg: responseData["msg"]);
         }
       }
-    } catch (e) {print("fail 222222222   $e}");
-    Fluttertoast.showToast(msg: tr("netError"));}
+    } catch (e) {
+      print("fail 222222222   $e");
+      setState(()=>isLoading=false);
+      Fluttertoast.showToast(msg: tr("netError"));}
   }
 
 
@@ -73,36 +77,37 @@ class _ContactUsState extends State<ContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffold,
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("contactUs"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        actions: [
-          InkWell(
-            onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Badge(
-                  value: "3",
-                  color: MyColors.red,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.notifications,
-                      color: MyColors.offPrimary,
-                      size: 28,
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              elevation: 0,
+              title: Text(tr("contactUs"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
                     ),
-                    onPressed: () {
-                      // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-                    },
-                  )),
+                  ),
+                )
+              ],
             ),
-          ),
-        ],
+            AppBarFoot(),
+          ],
+        ),
       ),
 
       body:SingleChildScrollView(
@@ -151,20 +156,25 @@ class _ContactUsState extends State<ContactUs> {
                         tr("yourMsg"),
                       ),
                     ),
-                    RichTextFiled(
+                    LabelTextField(
                       margin: EdgeInsets.only(top: 5),
                       label: tr("enterYourMsg"),
                       type: TextInputType.emailAddress,
-                      height: 130,
-                      max: 8,
-                      min: 6,
+                      lines: 7,
                       controller: _msg,
                     ),
+
+
+                    isLoading?
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: SpinKitDoubleBounce(color: MyColors.accent, size: 30.0))
+                        :
                     CustomButton(
                       title: tr("send"),
                       onTap: () {
                         if(_name.text==""||_mail.text==""||_msg.text==""){
-                          Fluttertoast.showToast(msg: tr("plzFillData"));
+                          Fluttertoast.showToast(msg: tr("plzFillFields"));
                         }else{
                           contactUs();
                         }
@@ -186,10 +196,10 @@ class _ContactUsState extends State<ContactUs> {
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                // loading ? Padding(
-                                //   padding: const EdgeInsets.symmetric(vertical: 15),
-                                //   child: SpinKitThreeBounce(color: MyColors.accent, size: 30.0),
-                                // ) :
+                                loading ? Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  child: SpinKitThreeBounce(color: MyColors.accent, size: 30.0),
+                                ) :
                                 Container(
                                   height: 70,
                                   width: MediaQuery.of(context).size.width * .5,
@@ -200,27 +210,27 @@ class _ContactUsState extends State<ContactUs> {
                                     children: [
                                       InkWell(
                                         onTap: () {
-                                          launchURL(url: "contactModel.data.contactUs.facebook");},
+                                          launchURL(url: contactModel.data.socialData[0].value);},
                                         child: Icon(Mdi.facebook, size: 50, color: Colors.indigoAccent),
                                       ),
-
                                       InkWell(
                                         onTap: () {
-                                          launchURL(url: "contactModel.data.contactUs.instagram");},
+                                          launchURL(url: contactModel.data.socialData[1].value);},
+                                        child: Icon(Mdi.twitter, size: 50, color: Colors.blue),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          launchURL(url: contactModel.data.socialData[2].value);},
                                         child: Icon(Mdi.instagram, size: 50, color: Colors.redAccent),
                                       ),
 
                                       InkWell(
                                         onTap: () {
-                                          launchURL(url: "contactModel.data.contactUs.linkedIn");},
+                                          launchURL(url: contactModel.data.socialData[3].value);},
                                         child: Icon(Mdi.linkedin, size: 50, color: Colors.lightBlueAccent),
                                       ),
 
-                                      InkWell(
-                                        onTap: () {
-                                          launchURL(url: "contactModel.data.contactUs.twitter");},
-                                        child: Icon(Mdi.twitter, size: 50, color: Colors.blue),
-                                      ),
+
 
                                     ],
                                   ),
@@ -259,33 +269,29 @@ class _ContactUsState extends State<ContactUs> {
   }
 
 
-
-
-
-
-
-
-  // bool loading =true;
-  // ContactModel contactModel = ContactModel();
-  // DioBase dioBase = DioBase();
-  // Future getContact() async {
-  //   SharedPreferences preferences = await SharedPreferences.getInstance();
-  //   Map<String, String> headers = {
-  //     "Authorization": "Bearer ${preferences.getString("token")}"
-  //   };
-  //   dioBase.get("sidePages?type=contactUs", headers: headers).then((response) {
-  //     if (response.data["key"] == "success") {
-  //       setState(() {loading=false;});
-  //       contactModel = ContactModel.fromJson(response.data);
-  //     } else {
-  //       EasyLoading.dismiss();
-  //       print("------------------------else");
-  //       Fluttertoast.showToast(msg: response.data["msg"]);
-  //     }
-  //   });
-  // }
-
-
+  bool loading = true;
+  ContactModel contactModel = ContactModel();
+  Future getContact() async {
+    SharedPreferences preferences =await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/site-data");
+    try {
+      final response = await http.get(url,
+        headers: {"lang":preferences.getString("lang")},
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() =>loading=false);
+        print(responseData);
+        if(responseData["key"]=="success"){
+          contactModel=ContactModel.fromJson(responseData);
+        }else{
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e) {
+      print("error $e");
+    }
+  }
 
 
 }
