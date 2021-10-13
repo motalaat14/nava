@@ -67,15 +67,15 @@ class Service {
     this.description,
     this.price,
     this.checked,
-    this.count=1,
+    this.count,
   });
 
   int id;
   String title;
   String description;
-  var price;
-  int count;
+  int price;
   bool checked;
+  int count;
 
   factory Service.fromJson(Map<String, dynamic> json) => Service(
     id: json["id"],
@@ -83,6 +83,7 @@ class Service {
     description: json["description"],
     price: json["price"],
     checked: json["checked"],
+    count: json["count"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -91,5 +92,6 @@ class Service {
     "description": description,
     "price": price,
     "checked": checked,
+    "count": count,
   };
 }

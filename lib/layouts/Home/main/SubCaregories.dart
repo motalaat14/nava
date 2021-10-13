@@ -111,6 +111,7 @@ class _SubCategoriesState extends State<SubCategories> {
     final url = Uri.https(URL, "api/sub-categories");
     try {
       final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
           "lang": preferences.getString("lang"),
           "category_id": widget.id.toString(),

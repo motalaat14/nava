@@ -407,6 +407,7 @@ class _MainState extends State<Main> {
     try {
       final response = await http.post(
         url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
           "lang": preferences.getString("lang"),
           "city_id": preferences.getInt("cityId").toString(),

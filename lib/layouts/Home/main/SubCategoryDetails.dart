@@ -20,6 +20,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/base.dart';
 import 'package:http/http.dart' as http;
 import 'package:nava/helpers/models/SubCategoryDetailsModel.dart';
+import 'package:nava/layouts/Home/cart/Cart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SubCategoryDetails extends StatefulWidget {
@@ -108,12 +109,15 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                         children: [
                                           InkWell(
                                             onTap:(){
-                                              if(!subCategoryDetailsModel.data.services[i].checked){
-                                                addToCart(counter: "up",serviceId: subCategoryDetailsModel.data.services[i].id.toString());
+                                              if(subCategoryDetailsModel.data.services[i].checked){
+                                                if(i==0){
+                                                  addToCart(counter: "down",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "0");
+                                                }else{
+                                                  addToCart(counter: "down",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "1");
+                                                }
                                               }else{
-                                                addToCart(counter: "down",serviceId: subCategoryDetailsModel.data.services[i].id.toString());
+                                                addToCart(counter: "up",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "0");
                                               }
-                                              addToCart(counter: "up",serviceId: subCategoryDetailsModel.data.services[i].id.toString());
                                               setState(() {
                                                 subCategoryDetailsModel.data.services[i].checked = !subCategoryDetailsModel.data.services[i].checked;
                                               });
@@ -162,6 +166,13 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                               children: <Widget>[
                                                 InkWell(
                                                   onTap: (){
+
+                                                    addToCart(
+                                                      serviceId: subCategoryDetailsModel.data.services[i].id.toString(),
+                                                      counter: "up",
+                                                      unchecked: "0",
+                                                    );
+
                                                     setState(() {
                                                       subCategoryDetailsModel.data.services[i].count++;
                                                     });
@@ -194,14 +205,6 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                   ),
                                 ),
                               );
-                              //   serviceItem(
-                              //   i : i,
-                              //   id: subCategoryDetailsModel.data.services[i].id,
-                              //   title: subCategoryDetailsModel.data.services[i].title,
-                              //   subTitle: subCategoryDetailsModel.data.services[i].description,
-                              //   price: subCategoryDetailsModel.data.services[i].price,
-                              //   checked: subCategoryDetailsModel.data.services[i].checked,
-                              // );
                             }),
                       ),
                       Container(
@@ -247,7 +250,7 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                     Text(tr("total"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                                     Row(
                                       children: [
-                                        Text(addToCartModel.data==null?subCategoryDetailsModel.data.price:addToCartModel.data.price.toString(),
+                                        Text(addToCartModel.data==null?subCategoryDetailsModel.data.price.toString():addToCartModel.data.price.toString(),
                                           style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
@@ -267,7 +270,9 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                               CustomButton(
                                 margin: EdgeInsets.only(top: 8),
                                 title: tr("continue"),
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (c)=>Cart()));
+                                },
                               ),
                             ],
                           ),
@@ -281,6 +286,59 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
     );
   }
 
+  String total,vat;
+  AddToCartModel addToCartModel =AddToCartModel();
+  Future addToCart({String serviceId,counter, unchecked}) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    LoadingDialog.showLoadingDialog();
+    print("----------------------------00");
+    print(preferences.getString("uuid"));
+    print(counter);
+    print(preferences.getInt("cityId").toString());
+    // print(widget.categoryId);
+    print(widget.id);
+    print(serviceId);
+    print(unchecked);
+    print(preferences.getString("token"));
+    final url = Uri.https(URL, "api/add-to-cart");
+    print("----------------------------01");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          "uuid": preferences.getString("uuid"),
+          "city_id": preferences.getInt("cityId").toString(),
+          "category_id": widget.id.toString(),
+          "service_id": serviceId,
+          "counter": counter,
+          "unchecked": unchecked,
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        EasyLoading.dismiss();
+        print(responseData);
+        if (responseData["key"] == "success") {
+          getSubCategoryDetails();
+          setState(() {
+            addToCartModel =AddToCartModel.fromJson(responseData);
+          });
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        } else {
+          print("----------------------------07");
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("----------------------------08");
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
+
+
+
   bool loading = true;
   SubCategoryDetailsModel subCategoryDetailsModel = SubCategoryDetailsModel();
   Future getSubCategoryDetails() async {
@@ -289,6 +347,7 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
     try {
       final response = await http.post(
         url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
           "lang": preferences.getString("lang"),
           "subcategory_id": widget.id.toString(),
@@ -311,48 +370,6 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
       print("error $e" + " ==>> track $t");
     }
   }
-
-
-  String total,vat;
-  AddToCartModel addToCartModel =AddToCartModel();
-  Future addToCart({String serviceId,counter}) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    LoadingDialog.showLoadingDialog();
-    print(serviceId);
-    print(counter);
-    final url = Uri.https(URL, "api/add-to-cart");
-    try {
-      final response = await http.post(url,
-        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
-        body: {
-          "lang": preferences.getString("lang"),
-          "uuid": preferences.getString("uuid"),
-          "city_id": preferences.getInt("cityId").toString(),
-          "category_id": widget.categoryId.toString(),
-          "service_id": serviceId,
-          "counter": counter,
-        },
-      ).timeout(Duration(seconds: 10), onTimeout: () {
-        throw 'no internet please connect to internet';
-      });
-      final responseData = json.decode(response.body);
-      if (response.statusCode == 200) {
-        EasyLoading.dismiss();
-        print(responseData);
-        if (responseData["key"] == "success") {
-          setState(() {
-            addToCartModel =AddToCartModel.fromJson(responseData);
-          });
-          Fluttertoast.showToast(msg: responseData["msg"]);
-        } else {
-          Fluttertoast.showToast(msg: responseData["msg"]);
-        }
-      }
-    } catch (e, t) {
-      print("error $e" + " ==>> track $t");
-    }
-  }
-
 
 
 }
