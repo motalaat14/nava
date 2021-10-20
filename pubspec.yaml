@@ -45,6 +45,10 @@ dependencies:
   google_maps_flutter: ^2.0.8
   maps_launcher: ^2.0.1
   provider: ^6.0.0
+  file_picker: ^3.0.2+2
+
+#  just_audio: ^0.8.0
+
 
 #  carousel_slider: ^4.0.0
 

@@ -54,6 +54,7 @@ class _SplashState extends State<Splash> {
 
   _goToApp()async{
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("cityId", 1);
     if(preferences.getString("lang")=="en"){
       changeLanguage("en",context);
       print("_____________________________________03 en");

@@ -10,17 +10,15 @@ import 'MyColors.dart';
 class LoadingDialog {
   static showLoadingDialog() {
     EasyLoading.show(
-        maskType: EasyLoadingMaskType.none,
+        maskType: EasyLoadingMaskType.clear,
         dismissOnTap: false,
-        indicator: SpinKitCubeGrid(
-          size: 45.0,
+        indicator: SpinKitFadingGrid(
+          size: 50.0,
           itemBuilder: (context, index) {
             return Container(
-              height: 10,
-              width: 10,
               margin: EdgeInsets.all(1),
               decoration: BoxDecoration(
-                  color: MyColors.accent, shape: BoxShape.circle),
+                  color: MyColors.primary, shape: BoxShape.rectangle),
             );
           },
         ),

@@ -23,6 +23,8 @@ import 'package:nava/helpers/models/SubCategoryDetailsModel.dart';
 import 'package:nava/layouts/Home/cart/Cart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Home.dart';
+
 class SubCategoryDetails extends StatefulWidget {
   final int id,categoryId;
   final String name, img;
@@ -54,6 +56,12 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
               title: Text(
                 widget.name,
                 style: TextStyle(fontSize: 16),
+              ),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
+                },
               ),
               actions: [
                 Container(
@@ -271,7 +279,7 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                 margin: EdgeInsets.only(top: 8),
                                 title: tr("continue"),
                                 onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (c)=>Cart()));
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (c)=>Cart(categoryId: widget.categoryId,)));
                                 },
                               ),
                             ],

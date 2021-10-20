@@ -317,15 +317,15 @@ class _MainState extends State<Main> {
           child: Container(
             padding: EdgeInsets.all(10.0),
             child: CupertinoActionSheet(
-              cancelButton: CupertinoButton(
-                child: Text(
-                  tr("confirm"),
-                  style: TextStyle(
-                      fontFamily: GoogleFonts.almarai().fontFamily,
-                      color: MyColors.red),
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
+              // cancelButton: CupertinoButton(
+              //   child: Text(
+              //     tr("confirm"),
+              //     style: TextStyle(
+              //         fontFamily: GoogleFonts.almarai().fontFamily,
+              //         color: MyColors.red),
+              //   ),
+              //   onPressed: () => Navigator.of(context).pop(),
+              // ),
               actions: <Widget>[
                 Center(
                   child: Padding(
@@ -351,16 +351,16 @@ class _MainState extends State<Main> {
                               style: TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.bold)),
                           onPressed: () async {
-                            SharedPreferences preferences =
-                                await SharedPreferences.getInstance();
+                            SharedPreferences preferences = await SharedPreferences.getInstance();
                             Navigator.of(context).pop();
                             setState(() {
                               city = citiesModel.data[i].title;
-                              preferences.setString(
-                                  "cityName", citiesModel.data[i].title);
-                              preferences.setInt(
-                                  "cityId", citiesModel.data[i].id);
+                              preferences.setString("cityName", citiesModel.data[i].title);
+                              preferences.setInt("cityId", citiesModel.data[i].id);
                             });
+                            getHome();
+                            print(preferences.getInt("cityId"));
+                            print(preferences.getInt("cityId"));
                           },
                         );
                       }),
@@ -401,8 +401,11 @@ class _MainState extends State<Main> {
 
   bool loading = true;
   HomeModel homeModel = HomeModel();
-  Future getHome() async {
+  Future getHome({int cityId}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {
+      loading = true;
+    });
     final url = Uri.https(URL, "api/home");
     try {
       final response = await http.post(
@@ -410,7 +413,7 @@ class _MainState extends State<Main> {
         headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
           "lang": preferences.getString("lang"),
-          "city_id": preferences.getInt("cityId").toString(),
+          "city_id": cityId ==null ? preferences.getInt("cityId").toString():cityId.toString(),
           "device_type": Platform.isIOS ? "ios" : "android",
         },
       ).timeout(Duration(seconds: 10), onTimeout: () {

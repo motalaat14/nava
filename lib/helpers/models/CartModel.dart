@@ -68,18 +68,21 @@ class DataService {
   DataService({
     this.id,
     this.title,
+    this.image,
     this.services,
     this.total,
   });
 
   int id;
   String title;
+  String image;
   List<ServiceService> services;
   int total;
 
   factory DataService.fromJson(Map<String, dynamic> json) => DataService(
     id: json["id"],
     title: json["title"],
+    image: json["image"],
     services: List<ServiceService>.from(json["services"].map((x) => ServiceService.fromJson(x))),
     total: json["total"],
   );
@@ -87,6 +90,7 @@ class DataService {
   Map<String, dynamic> toJson() => {
     "id": id,
     "title": title,
+    "image": image,
     "services": List<dynamic>.from(services.map((x) => x.toJson())),
     "total": total,
   };

@@ -49,7 +49,7 @@ class InkWellTextField extends StatelessWidget {
               validator: (value)=> validate(value),
               style: GoogleFonts.almarai(fontSize: 20, color: Colors.black),
               decoration: InputDecoration(
-                fillColor: fillColor?? MyColors.secondary.withOpacity(.5),
+                fillColor: fillColor?? MyColors.white,
                 enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
                         color: borderColor ?? MyColors.grey.withOpacity(.5), width: 1),

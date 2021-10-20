@@ -35,7 +35,7 @@ class _LabelTextFieldState extends State<LabelTextField> {
       child: ConstrainedBox(
         constraints: BoxConstraints(
             minHeight: 45,
-            maxHeight: 200,
+            maxHeight: MediaQuery.of(context).size.height*.8,
             minWidth: widget.minWidth??double.infinity,
             maxWidth: widget.maxWidth??double.infinity
         ),
@@ -78,7 +78,7 @@ class _LabelTextFieldState extends State<LabelTextField> {
             // isDense: true,
             // isCollapsed: true,
 
-              labelStyle: GoogleFonts.almarai(fontSize: 15),
+              labelStyle: GoogleFonts.almarai(fontSize: 14,color: MyColors.grey),
               contentPadding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
               filled: true,
               fillColor: Colors.white,
