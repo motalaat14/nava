@@ -1,9 +1,19 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/EmptyBox.dart';
+import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/ProcessingOrdersModel.dart';
 import 'package:nava/layouts/Home/orders/OrderDetails.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class ProcessingOrders extends StatefulWidget {
 
@@ -12,19 +22,38 @@ class ProcessingOrders extends StatefulWidget {
 }
 
 class _ProcessingOrdersState extends State<ProcessingOrders> {
+
+  @override
+  void initState() {
+    getProcessingOrders();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListView.builder(
+      child:
+
+          loading ?
+              MyLoading()
+              :
+
+          processingOrdersModel.data.length==0 ?
+              EmptyBox(
+                title: tr("noOrders"),
+                widget: Container(),
+              )
+              :
+          ListView.builder(
         padding: EdgeInsets.symmetric(horizontal: 15),
-          itemCount: 6,
+          itemCount: processingOrdersModel.data.length,
           itemBuilder: (c,i){
             return orderItem(
-                id: 1,
-                title: "اناره",
-                orderNum: "1266750",
-                price: "245",
-                status: "لديك فاتورة جدبدة"
+                id: processingOrdersModel.data[i].id,
+                title: processingOrdersModel.data[i].categoryTitle,
+                orderNum: processingOrdersModel.data[i].orderNum,
+                price: processingOrdersModel.data[i].price,
+                status: processingOrdersModel.data[i].status
             );
         }),
     );
@@ -34,7 +63,7 @@ class _ProcessingOrdersState extends State<ProcessingOrders> {
   Widget orderItem({int id , String title,status,price , orderNum}){
     return InkWell(
       onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (c)=>OrderDetails()));
+        Navigator.of(context).push(MaterialPageRoute(builder: (c)=>OrderDetails(id: id,)));
       },
       child: Container(
         margin: EdgeInsets.only(top: 5),
@@ -109,6 +138,39 @@ class _ProcessingOrdersState extends State<ProcessingOrders> {
       ),
     );
   }
+
+
+
+  bool loading = true;
+  ProcessingOrdersModel processingOrdersModel = ProcessingOrdersModel();
+  Future getProcessingOrders() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/my-orders/current");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          // "uuid": preferences.getString("uuid"),
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {
+        throw 'no internet please connect to internet';
+      });
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => loading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          processingOrdersModel = ProcessingOrdersModel.fromJson(responseData);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
 
 
 }

@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
@@ -329,12 +330,12 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
                   ),
                   content: Column(
                     children: [
-                      Text(tr("cong"),),
-                      Text(tr("notesAddedSuc"),),
+                      Text(tr("cong"),style: GoogleFonts.almarai(fontSize: 20,fontWeight: FontWeight.bold),),
+                      Text(tr("notesAddedSuc"),style: GoogleFonts.almarai(fontSize: 15)),
                     ],
                   ),
                   actions: [
-                    CustomButton(title: "continueOrder", onTap: (){
+                    CustomButton(title: tr("continueOrder"), onTap: (){
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     })

@@ -15,6 +15,9 @@ import '../../../res.dart';
 import 'Pay.dart';
 
 class OrderDetails extends StatefulWidget {
+  final int id;
+
+  const OrderDetails({Key key, this.id}) : super(key: key);
 
   @override
   _OrderDetailsState createState() => _OrderDetailsState();

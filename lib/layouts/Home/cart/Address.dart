@@ -164,6 +164,7 @@ class _AddressState extends State<Address> {
                 LabelTextField(
                   controller: street,
                   label: tr("street"),
+                  action: TextInputAction.next,
                   margin: EdgeInsets.symmetric(vertical: 8),
                 ),
                 Padding(
@@ -173,6 +174,7 @@ class _AddressState extends State<Address> {
                 LabelTextField(
                   controller: house,
                   label: tr("house"),
+                  action: TextInputAction.next,
                   margin: EdgeInsets.symmetric(vertical: 8),
                 ),
                 Padding(
@@ -182,6 +184,7 @@ class _AddressState extends State<Address> {
                 LabelTextField(
                   controller: floor,
                   label: tr("floor"),
+                  action: TextInputAction.next,
                   type: TextInputType.number,
                   margin: EdgeInsets.symmetric(vertical: 8),
                 ),
@@ -192,6 +195,7 @@ class _AddressState extends State<Address> {
                 LabelTextField(
                   controller: notes,
                   label: tr("notes"),
+                  action: TextInputAction.done,
                   lines: 5,
                   margin: EdgeInsets.symmetric(vertical: 8),
                 ),
@@ -385,7 +389,7 @@ class _AddressState extends State<Address> {
       if (response.statusCode == 200) {
         EasyLoading.dismiss();
         if (response.data["key"] == "success") {
-          Navigator.of(context).push(MaterialPageRoute(builder: (c)=>DetailedBill()));
+          Navigator.of(context).push(MaterialPageRoute(builder: (c)=>DetailedBill(orderId: widget.orderId,)));
           Fluttertoast.showToast(msg: response.data["msg"]);
           print("---------------------------------------successsuccess");
         } else {

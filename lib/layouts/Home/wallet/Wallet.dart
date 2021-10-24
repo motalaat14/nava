@@ -7,6 +7,15 @@ import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 
 import '../../../res.dart';
+import 'dart:convert';
+import 'package:flutter/painting.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/ProcessingOrdersModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class Wallet extends StatefulWidget {
 
@@ -15,6 +24,13 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+
+  @override
+  void initState() {
+    getWallet();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +77,7 @@ class _WalletState extends State<Wallet> {
           ),
           Center(child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
-            child: Text(tr("currentBalance"),style: TextStyle(fontSize: 18),),
+            child: Text(tr("currentBalance"),style: TextStyle(fontSize: 22),),
           )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
@@ -71,7 +87,7 @@ class _WalletState extends State<Wallet> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Text("275",style: TextStyle(fontSize: 80,fontWeight: FontWeight.bold,color: MyColors.primary),),
+                  child: Text(wallet,style: TextStyle(fontSize: 90,fontWeight: FontWeight.bold,color: MyColors.primary),),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -96,4 +112,39 @@ class _WalletState extends State<Wallet> {
       ),
     );
   }
+
+
+  String wallet="0";
+  bool loading = true;
+  Future getWallet() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/wallet");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {
+        throw 'no internet please connect to internet';
+      });
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => loading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          setState(() {
+            wallet = responseData["data"].toString();
+          });
+
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
+
 }

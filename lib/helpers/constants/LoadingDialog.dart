@@ -10,7 +10,7 @@ import 'MyColors.dart';
 class LoadingDialog {
   static showLoadingDialog() {
     EasyLoading.show(
-        maskType: EasyLoadingMaskType.clear,
+        maskType: EasyLoadingMaskType.none,
         dismissOnTap: false,
         indicator: SpinKitFadingGrid(
           size: 50.0,

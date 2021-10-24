@@ -1,6 +1,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/painting.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/EmptyBox.dart';
+import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/ProcessingOrdersModel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class FinishedOrders extends StatefulWidget {
 
@@ -9,19 +21,34 @@ class FinishedOrders extends StatefulWidget {
 }
 
 class _FinishedOrdersState extends State<FinishedOrders> {
+
+  @override
+  void initState() {
+    getFinishedOrders();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListView.builder(
+      child:
+      loading ?
+      MyLoading() :
+      finishedOrdersModel.data.length==0 ?
+      EmptyBox(
+        title: tr("noOrders"),
+        widget: Container(),
+      ) :
+      ListView.builder(
           padding: EdgeInsets.symmetric(horizontal: 15),
-          itemCount: 2,
+          itemCount: finishedOrdersModel.data.length,
           itemBuilder: (c,i){
             return orderItem(
-              id: 1,
-              title: "اناره",
-              orderNum: "1266750",
-              price: "245",
-              status: "منتهية"
+              id: finishedOrdersModel.data[i].id,
+              title: finishedOrdersModel.data[i].categoryTitle,
+              orderNum: finishedOrdersModel.data[i].orderNum,
+              price: finishedOrdersModel.data[i].price,
+              status: finishedOrdersModel.data[i].status
             );
           }),
     );
@@ -99,4 +126,37 @@ class _FinishedOrdersState extends State<FinishedOrders> {
       ),
     );
   }
+
+
+  bool loading = true;
+  ProcessingOrdersModel finishedOrdersModel = ProcessingOrdersModel();
+  Future getFinishedOrders() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/my-orders/finish");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          // "uuid": preferences.getString("uuid"),
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {
+        throw 'no internet please connect to internet';
+      });
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => loading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          finishedOrdersModel = ProcessingOrdersModel.fromJson(responseData);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
+
 }

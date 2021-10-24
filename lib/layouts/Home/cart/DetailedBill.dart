@@ -1,20 +1,51 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
 import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
+import 'package:nava/helpers/customs/LabelTextField.dart';
+import 'package:nava/helpers/customs/Loading.dart';
+import 'package:nava/helpers/models/CartDetailsModel.dart';
+import 'package:nava/layouts/Home/orders/SuccessfulOrder.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../../../res.dart';
 
+enum PayType { visa, apple,cash,wallet }
+
 class DetailedBill extends StatefulWidget {
+  final int orderId;
+
+  const DetailedBill({Key key, this.orderId}) : super(key: key);
   @override
   _DetailedBillState createState() => _DetailedBillState();
 }
 
 class _DetailedBillState extends State<DetailedBill> {
+
+  @override
+  void initState() {
+    getCartDetails();
+    super.initState();
+  }
+
+
+  GlobalKey<FormState> _formKey = new GlobalKey();
+  TextEditingController _coupon = new TextEditingController();
+  PayType type =PayType.visa ;
+  String payment="visa";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,11 +83,10 @@ class _DetailedBillState extends State<DetailedBill> {
         ),
       ),
 
-
-
-
-
-      body: ListView(
+      body:
+          loading ? MyLoading()
+              :
+      ListView(
         padding: EdgeInsets.symmetric(horizontal: 15),
         children: [
           Padding(
@@ -64,20 +94,18 @@ class _DetailedBillState extends State<DetailedBill> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("رقم الطلب",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
-                Text("1237550",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                Text(cartDetailsModel.data.time,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                Text(cartDetailsModel.data.date,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
               ],
             ),
           ),
-          Divider(thickness: .5,color: MyColors.black,),
-
           Divider(thickness: .5,color: MyColors.black,),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("كهرباء",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                Text(cartDetailsModel.data.categoryTitle,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
                 Image(image: ExactAssetImage(Res.energy),height: 30,color: MyColors.black,)
               ],
             ),
@@ -85,7 +113,7 @@ class _DetailedBillState extends State<DetailedBill> {
           Divider(thickness: .5,color: MyColors.black,),
           InkWell(
             onTap: (){
-              MapsLauncher.launchCoordinates(24.69, 46.75);
+              MapsLauncher.launchCoordinates(cartDetailsModel.data.lat, cartDetailsModel.data.lng);
             },
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 15,vertical: 5),
@@ -100,15 +128,15 @@ class _DetailedBillState extends State<DetailedBill> {
           ),
           Container(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height*.3,
+            height: MediaQuery.of(context).size.height*.25,
             decoration: BoxDecoration(
                 border: Border.all(color: MyColors.offPrimary,width: 1)
             ),
             child: GoogleMap(
               mapType: MapType.normal,
               initialCameraPosition: CameraPosition(
-                target: LatLng(24.69, 46.75),
-                zoom: 11,
+                target: LatLng(cartDetailsModel.data.lat, cartDetailsModel.data.lng),
+                zoom: 15,
               ),
               markers: Set<Marker>.of(markers.values),
             ),
@@ -125,38 +153,40 @@ class _DetailedBillState extends State<DetailedBill> {
                 ),
                 Row(
                   children: [
-                    Text("الحي : ",style: TextStyle(fontSize: 15),),
-                    Text("المروة",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                    Text("${tr("neighbor")} : ",style: TextStyle(fontSize: 15),),
+                    Text(cartDetailsModel.data.region,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
                   ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      Text("الشارع : ",style: TextStyle(fontSize: 15),),
-                      Text("عبد العزيز",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                      Text("${tr("street")} : ",style: TextStyle(fontSize: 15),),
+                      Text(cartDetailsModel.data.street,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
                     ],
                   ),
                 ),
                 Row(
                   children: [
-                    Text("المنزل : ",style: TextStyle(fontSize: 15),),
-                    Text("23",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                    Text("${tr("house")} : ",style: TextStyle(fontSize: 15),),
+                    Text(cartDetailsModel.data.residence,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
                   ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
-                      Text("الدور : ",style: TextStyle(fontSize: 15),),
-                      Text("4",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                      Text("${tr("floor")} : ",style: TextStyle(fontSize: 15),),
+                      Text(cartDetailsModel.data.floor,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
                     ],
                   ),
                 ),
                 Row(
                   children: [
-                    Text("ملاحظات إضافية : ",style: TextStyle(fontSize: 15),),
-                    Text("بجوار البيك",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold),),
+                    Text("${tr("addedNotes")} : ",style: TextStyle(fontSize: 15),),
+                    Container(
+                      width: MediaQuery.of(context).size.width*.62,
+                        child: Text(cartDetailsModel.data.addressNotes,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,overflow: TextOverflow.ellipsis),)),
                   ],
                 ),
               ],
@@ -165,18 +195,18 @@ class _DetailedBillState extends State<DetailedBill> {
           Divider(thickness: .5,color: MyColors.black,),
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: Text("تفاصيل الخدمة",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: MyColors.offPrimary),),
+            child: Text(tr("serviceDetails"),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: MyColors.offPrimary),),
           ),
           Container(
-            height: 140*2.0,
+            height: 135.0*cartDetailsModel.data.services.length,
             child: ListView.builder(
-                itemCount: 2,
+                itemCount: cartDetailsModel.data.services.length,
                 itemBuilder: (c,i){
                   return serviceItem(
+                    index : i,
                     img: "https://www.ctrmcloud.com/wp-content/uploads/2021/07/Blog-Image.jpg",
-                    title: "اسم الخدمة",
-                    subTitle: "اسم الخدمة طلب معاينة",
-                    price: "120",
+                    title: cartDetailsModel.data.services[i].title,
+                    price: cartDetailsModel.data.services[i].total.toString(),
                   );
                 }),
           ),
@@ -189,8 +219,11 @@ class _DetailedBillState extends State<DetailedBill> {
                 Text(tr("vat"),style: TextStyle(fontSize: 16),),
                 Row(
                   children: [
-                    Text("85",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                    Text(tr("rs"),style: TextStyle(fontSize: 14,color: MyColors.grey),),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(cartDetailsModel.data.tax.toString(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                    ),
+                    Text(tr("rs"),style: TextStyle(fontSize: 12),),
                   ],
                 ),
               ],
@@ -204,30 +237,197 @@ class _DetailedBillState extends State<DetailedBill> {
                 Text(tr("total"),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                 Row(
                   children: [
-                    Text("1025",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                    Text(tr("rs"),style: TextStyle(fontSize: 14,color: MyColors.grey),),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(cartDetailsModel.data.total,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                    ),
+                    Text(tr("rs"),style: TextStyle(fontSize: 12),),
                   ],
                 ),
               ],
             ),
           ),
           Divider(thickness: .5,color: MyColors.black,),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(tr("payWay"),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                Text("فيزا",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-              ],
+          Text(tr("coupon"),style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color: MyColors.offPrimary),),
+          Form(
+            key: _formKey,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  LabelTextField(
+                    margin: EdgeInsets.only(top: 0),
+                    maxWidth: MediaQuery.of(context).size.width*.63,
+                    minWidth: MediaQuery.of(context).size.width*.60,
+                    label: tr("coupon"),
+                    type: TextInputType.text,
+                    controller: _coupon,
+                  ),
+
+
+                  CustomButton(
+                    width: MediaQuery.of(context).size.width*.27,
+                    margin: EdgeInsets.only(top: 0),
+                    borderRadius: BorderRadius.circular(10),
+                    title: tr("active"),
+                    onTap: (){
+                      addCoupon();
+                    },
+                  ),
+
+                ],
+              ),
             ),
           ),
+          Divider(thickness: .5,color: MyColors.black,),
 
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr("selectPay"),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color: MyColors.offPrimary),),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    type = PayType.visa;
+                    payment = "visa";
+                  });
+                  print(payment);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                        activeColor: MyColors.primary,
+                        value: PayType.visa,
+                        groupValue: type,
+                        onChanged: (PayType value) {
+                          setState(() {
+                            print(value);
+                            type = value;
+                            payment = "visa";
+                          });
+                          print(payment);
+                        }),
+                    
+                    Image(image: ExactAssetImage(Res.visa),width: 50,),
+                    
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(tr("visa"),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    type = PayType.apple;
+                    payment = "apple";
+                  });
+                  print(payment);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                        activeColor: MyColors.accent,
+                        hoverColor: MyColors.white,
+                        focusColor: MyColors.white,
+                        value: PayType.apple,
+                        groupValue: type,
+                        onChanged: (PayType value) {
+                          setState(() {
+                            print(value);
+                            type = value;
+                            payment = "apple";
+                          });
+                          print(payment);
+
+                        }),
+                    Image(image: ExactAssetImage(Res.applepay),width: 45,),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(tr("apple"),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                    ),                  ],
+                ),
+              ),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    type = PayType.cash;
+                    payment = "cash";
+                  });
+                  print(payment);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                        activeColor: MyColors.accent,
+                        hoverColor: MyColors.white,
+                        focusColor: MyColors.white,
+                        value: PayType.cash,
+                        groupValue: type,
+                        onChanged: (PayType value) {
+                          setState(() {
+                            print(value);
+                            type = value;
+                            payment = "cash";
+                          });
+                          print(payment);
+
+                        }),
+                    Image(image: ExactAssetImage(Res.cashpayment),width: 50,height: 30,fit: BoxFit.fill,),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(tr("cash"),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                    ),                  ],
+                ),
+              ),
+              InkWell(
+                onTap: (){
+                  setState(() {
+                    type = PayType.wallet;
+                    payment = "wallet";
+                  });
+                  print(payment);
+                },
+                child: Row(
+                  children: <Widget>[
+                    Radio(
+                        activeColor: MyColors.accent,
+                        value: PayType.wallet,
+                        groupValue: type,
+                        onChanged: (PayType value) {
+                          setState(() {
+                            print(value);
+                            type = value;
+                            payment = "wallet";
+                          });
+                          print(payment);
+                        }),
+                    Image(image: ExactAssetImage(Res.wallet),width: 40,height: 30,fit: BoxFit.fill,),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(tr("wallet"),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          btnLoading?
+          Padding(
+              padding: const EdgeInsets.symmetric(vertical: 30),
+              child: SpinKitDoubleBounce(color: MyColors.primary, size: 25.0))
+              :
           CustomButton(
             margin: EdgeInsets.symmetric(vertical: 25),
-            title: tr("payBell"),
+            title: tr("continue"),
             onTap: (){
-              // Navigator.of(context).push(MaterialPageRoute(builder: (c)=>Pay()));
+              placeOrder();
             },
           ),
         ],
@@ -235,12 +435,10 @@ class _DetailedBillState extends State<DetailedBill> {
     );
   }
 
-
-  Widget serviceItem({String img,title,subTitle,price}){
+  Widget serviceItem({int index,String img,title,price}){
     return Container(
       margin: EdgeInsets.only(bottom: 6),
       width: MediaQuery.of(context).size.width,
-      // height: 150,
       decoration: BoxDecoration(
           color: MyColors.white,
           borderRadius: BorderRadius.circular(5),
@@ -251,11 +449,11 @@ class _DetailedBillState extends State<DetailedBill> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             child: Row(
               children: [
                 Container(
-                  width: 55,height: 55,
+                  width: 45,height: 45,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(5),
                     border: Border.all(),
@@ -269,20 +467,47 @@ class _DetailedBillState extends State<DetailedBill> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(subTitle,style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold,color: MyColors.primary),),
+          Container(
+            height: 18.0*cartDetailsModel.data.services[index].services.length,
+            child: ListView.builder(
+              itemCount: cartDetailsModel.data.services[index].services.length,
+                itemBuilder: (c,i){
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(cartDetailsModel.data.services[index].services[i].title,style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold,color: MyColors.primary),),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(cartDetailsModel.data.services[index].services[i].price.toString(),style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),),
+                        ),
+                        Text(tr("rs"),style: TextStyle(fontSize: 12,),),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
+
+          Divider(height: 0,thickness: 1,),
+
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(tr("price"),style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                 Row(
                   children: [
-                    Text(price,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
-                    Text(tr("rs"),style: TextStyle(fontSize: 14,color: MyColors.grey),),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(price,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                    ),
+                    Text(tr("rs"),style: TextStyle(fontSize: 12),),
                   ],
                 ),
               ],
@@ -293,8 +518,7 @@ class _DetailedBillState extends State<DetailedBill> {
     );
   }
 
-  Map<MarkerId, Marker> markers = <MarkerId, Marker>{}; // CLASS MEMBER, MAP OF MARKS
-
+  Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
   void _add() {
     var markerIdVal = "1";
     final MarkerId markerId = MarkerId(markerIdVal);
@@ -308,4 +532,102 @@ class _DetailedBillState extends State<DetailedBill> {
       markers[markerId] = marker;
     });
   }
+
+  bool loading = true;
+  CartDetailsModel cartDetailsModel = CartDetailsModel();
+  Future getCartDetails() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/cart-details");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          "order_id": widget.orderId.toString(),
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: ()=>throw 'no internet please connect to internet');
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => loading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          cartDetailsModel = CartDetailsModel.fromJson(responseData);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
+  Future addCoupon() async {
+    LoadingDialog.showLoadingDialog();
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    print("${preferences.getString("token")}");
+    print("${preferences.getString("uuid")}");
+
+    final url = Uri.https(URL, "api/add-coupon");
+    try {
+      final response = await http.post(url, body: {
+        "lang": preferences.getString("lang"),
+        "order_id": widget.orderId.toString(),
+        "coupon":_coupon.text,
+      }, headers: {
+        "Authorization": "Bearer ${preferences.getString("token")}"
+      }).timeout(Duration(seconds: 7), onTimeout: ()=>throw 'no internet please connect to internet',);
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        EasyLoading.dismiss();
+        print(responseData);
+        if (responseData["key"] == "success") {
+          print("addCouponaddCouponaddCouponaddCouponaddCouponaddCouponaddCoupon addCoupon");
+          Fluttertoast.showToast(
+            msg: responseData["msg"],
+          );
+        } else {
+          Fluttertoast.showToast(
+            msg: responseData["msg"],
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.CENTER,
+          );
+        }
+      }
+    } catch (e,t) {
+      print("error $e   track $t");
+    }
+  }
+
+  bool btnLoading = false;
+  Future placeOrder() async {
+    setState(() {btnLoading=true;});
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    print("${preferences.getString("token")}");
+    print(widget.orderId);
+    print(payment);
+    final url = Uri.https(URL, "api/place-order");
+    try {
+      final response = await http.post(url, body: {
+        "lang": preferences.getString("lang"),
+        "order_id": widget.orderId.toString(),
+        "pay_type":payment,
+      }, headers: {"Authorization": "Bearer ${preferences.getString("token")}"
+      }).timeout(Duration(seconds: 7), onTimeout: ()=>throw 'no internet please connect to internet',);
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() {btnLoading=true;});
+        print(responseData);
+        if (responseData["key"] == "success") {
+          print("place order success");
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>SuccessfulOrder()), (route) => false);
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e,t) {
+      print("error $e   track $t");
+    }
+  }
+
 }
