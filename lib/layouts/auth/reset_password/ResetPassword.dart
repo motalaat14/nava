@@ -73,16 +73,26 @@ class _ResetPasswordState extends State<ResetPassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffold,
+      appBar: AppBar(
+        backgroundColor: MyColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios,color: MyColors.offPrimary,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: ListView(
           physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-          padding: EdgeInsets.symmetric(vertical: 20),
+          padding: EdgeInsets.symmetric(vertical: 0),
           children: <Widget>[
 
             Padding(
-              padding: const EdgeInsets.only(top: 60),
+              padding: const EdgeInsets.only(top: 10),
               child: Image(
                 image: AssetImage(Res.logo),
                 fit: BoxFit.contain,
@@ -97,8 +107,6 @@ class _ResetPasswordState extends State<ResetPassword> {
       ),
     );
   }
-
-
 
   Widget _buildFormInputs(){
     return Container(
@@ -176,7 +184,6 @@ class _ResetPasswordState extends State<ResetPassword> {
     );
   }
 
-
   Future resetPassword() async {
     SharedPreferences preferences =await SharedPreferences.getInstance();
     if(_new.text==""||_conform.text==""){
@@ -185,17 +192,16 @@ class _ResetPasswordState extends State<ResetPassword> {
       Fluttertoast.showToast(msg: "كلمتي المرور غير متطابقتين",);
     }else{
     LoadingDialog.showLoadingDialog();
-    final url = Uri.https(URL, "api/reset_password");
+    final url = Uri.https(URL, "api/forget-password");
     try {
       final response = await http.post(url,
         body: {
           "phone": "${widget.phone}",
-          "reset_code": "${_code.text}",
+          "v_code": "${_code.text}",
           "password": "${_new.text}",
-          "password_confirmation": "${_new.text}",
           "lang": "${preferences.getString("lang")}",
         },
-      ).timeout( Duration(seconds: 7), onTimeout: () {throw 'no internet please connect to internet';},);
+      ).timeout( Duration(seconds: 7), onTimeout: () {throw 'no internet';},);
       final responseData = json.decode(response.body);
       if (response.statusCode == 200) {
         EasyLoading.dismiss();

@@ -1,15 +1,15 @@
 // To parse this JSON data, do
 //
-//     final cartDetailsModel = cartDetailsModelFromJson(jsonString);
+//     final orderDetailsModel = orderDetailsModelFromJson(jsonString);
 
 import 'dart:convert';
 
-CartDetailsModel cartDetailsModelFromJson(String str) => CartDetailsModel.fromJson(json.decode(str));
+OrderDetailsModel orderDetailsModelFromJson(String str) => OrderDetailsModel.fromJson(json.decode(str));
 
-String cartDetailsModelToJson(CartDetailsModel data) => json.encode(data.toJson());
+String orderDetailsModelToJson(OrderDetailsModel data) => json.encode(data.toJson());
 
-class CartDetailsModel {
-  CartDetailsModel({
+class OrderDetailsModel {
+  OrderDetailsModel({
     this.key,
     this.msg,
     this.data,
@@ -19,7 +19,7 @@ class CartDetailsModel {
   String msg;
   Data data;
 
-  factory CartDetailsModel.fromJson(Map<String, dynamic> json) => CartDetailsModel(
+  factory OrderDetailsModel.fromJson(Map<String, dynamic> json) => OrderDetailsModel(
     key: json["key"],
     msg: json["msg"],
     data: Data.fromJson(json["data"]),
@@ -34,11 +34,88 @@ class CartDetailsModel {
 
 class Data {
   Data({
+    this.allStatus,
+    this.statusName,
+    this.status,
+    this.details,
+    this.invoice,
+    this.payType,
+    this.billId,
+  });
+
+  AllStatus allStatus;
+  String statusName;
+  String status;
+  Details details;
+  bool invoice;
+  String payType;
+  int billId;
+
+  factory Data.fromJson(Map<String, dynamic> json) => Data(
+    allStatus: AllStatus.fromJson(json["allStatus"]),
+    statusName: json["status_name"],
+    status: json["status"],
+    details: Details.fromJson(json["details"]),
+    invoice: json["invoice"],
+    payType: json["pay_type"],
+    billId: json["bill_id"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "allStatus": allStatus.toJson(),
+    "status_name": statusName,
+    "status": status,
+    "details": details.toJson(),
+    "invoice": invoice,
+    "pay_type": payType,
+    "bill_id": billId,
+  };
+}
+
+class AllStatus {
+  AllStatus({
+    this.created,
+    this.accepted,
+    this.arrived,
+    this.inProgress,
+    this.finished,
+    this.userCancel,
+  });
+
+  String created;
+  String accepted;
+  String arrived;
+  String inProgress;
+  String finished;
+  String userCancel;
+
+  factory AllStatus.fromJson(Map<String, dynamic> json) => AllStatus(
+    created: json["created"],
+    accepted: json["accepted"],
+    arrived: json["arrived"],
+    inProgress: json["in-progress"],
+    finished: json["finished"],
+    userCancel: json["user_cancel"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "created": created,
+    "accepted": accepted,
+    "arrived": arrived,
+    "in-progress": inProgress,
+    "finished": finished,
+    "user_cancel": userCancel,
+  };
+}
+
+class Details {
+  Details({
     this.id,
     this.orderNum,
     this.date,
     this.time,
     this.categoryTitle,
+    this.categoryImage,
     this.lat,
     this.lng,
     this.region,
@@ -49,7 +126,6 @@ class Data {
     this.services,
     this.tax,
     this.total,
-    this.miniOrderCharge,
   });
 
   int id;
@@ -57,6 +133,7 @@ class Data {
   String date;
   String time;
   String categoryTitle;
+  String categoryImage;
   double lat;
   double lng;
   String region;
@@ -64,17 +141,17 @@ class Data {
   String floor;
   String street;
   String addressNotes;
-  List<DataService> services;
+  List<DetailsService> services;
   double tax;
   String total;
-  String miniOrderCharge;
 
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
+  factory Details.fromJson(Map<String, dynamic> json) => Details(
     id: json["id"],
     orderNum: json["order_num"],
     date: json["date"],
     time: json["time"],
     categoryTitle: json["category_title"],
+    categoryImage: json["category_image"],
     lat: json["lat"].toDouble(),
     lng: json["lng"].toDouble(),
     region: json["region"],
@@ -82,10 +159,9 @@ class Data {
     floor: json["floor"],
     street: json["street"],
     addressNotes: json["address_notes"],
-    services: List<DataService>.from(json["services"].map((x) => DataService.fromJson(x))),
+    services: List<DetailsService>.from(json["services"].map((x) => DetailsService.fromJson(x))),
     tax: json["tax"].toDouble(),
     total: json["total"],
-    miniOrderCharge: json["mini_order_charge"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -94,6 +170,7 @@ class Data {
     "date": date,
     "time": time,
     "category_title": categoryTitle,
+    "category_image": categoryImage,
     "lat": lat,
     "lng": lng,
     "region": region,
@@ -104,12 +181,11 @@ class Data {
     "services": List<dynamic>.from(services.map((x) => x.toJson())),
     "tax": tax,
     "total": total,
-    "mini_order_charge": miniOrderCharge,
   };
 }
 
-class DataService {
-  DataService({
+class DetailsService {
+  DetailsService({
     this.id,
     this.title,
     this.image,
@@ -123,7 +199,7 @@ class DataService {
   List<ServiceService> services;
   int total;
 
-  factory DataService.fromJson(Map<String, dynamic> json) => DataService(
+  factory DetailsService.fromJson(Map<String, dynamic> json) => DetailsService(
     id: json["id"],
     title: json["title"],
     image: json["image"],

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -6,9 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/constants/base.dart';
 import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/LabelTextField.dart';
@@ -17,9 +22,16 @@ import 'package:nava/layouts/Home/orders/SuccessfulOrder.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 
 import '../../../res.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 enum PayType { visa,apple,cash,wallet }
 
 class Pay extends StatefulWidget {
+  final int orderId;
+  final String price,tax;
+
+  const Pay({Key key, this.orderId, this.price, this.tax}) : super(key: key);
 
   @override
   _PayState createState() => _PayState();
@@ -47,8 +59,9 @@ class _PayState extends State<Pay> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("pay"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("pay"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -96,8 +109,8 @@ class _PayState extends State<Pay> {
                     Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: Text("95",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(widget.tax,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                         ),
                         Text(tr("rs"),style: TextStyle(fontSize: 14,color: MyColors.grey),),
                       ],
@@ -113,8 +126,8 @@ class _PayState extends State<Pay> {
                       Row(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Text("1205",style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(widget.price,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold),),
                           ),
                           Text(tr("rs"),style: TextStyle(fontSize: 14,color: MyColors.grey),),
                         ],
@@ -151,7 +164,9 @@ class _PayState extends State<Pay> {
                           margin: EdgeInsets.only(top: 0),
                           borderRadius: BorderRadius.circular(10),
                           title: tr("active"),
-                          onTap: (){},
+                          onTap: (){
+                            addCoupon();
+                          },
                         ),
 
                       ],
@@ -309,6 +324,7 @@ class _PayState extends State<Pay> {
                   margin: EdgeInsets.symmetric(vertical: 5),
                   title: tr("payIt"),
                   onTap: (){
+
                     Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>SuccessfulOrder()), (route) => false);
                   },
                 ),
@@ -330,4 +346,37 @@ class _PayState extends State<Pay> {
 
     );
   }
+
+  Future addCoupon() async {
+    LoadingDialog.showLoadingDialog();
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    print("${preferences.getString("token")}");
+    print("${preferences.getString("uuid")}");
+    final url = Uri.https(URL, "api/add-coupon");
+    try {
+      final response = await http.post(url, body: {
+        "lang": preferences.getString("lang"),
+        "order_id": widget.orderId.toString(),
+        "coupon":_coupon.text,
+      }, headers: {
+        "Authorization": "Bearer ${preferences.getString("token")}"
+      }).timeout(Duration(seconds: 7), onTimeout: ()=>throw 'no internet please connect to internet',);
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        EasyLoading.dismiss();
+        print(responseData);
+        if (responseData["key"] == "success") {
+          print("addCouponaddCouponaddCouponaddCouponaddCouponaddCouponaddCoupon addCoupon");
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e,t) {
+      print("error $e   track $t");
+    }
+  }
+
+
+
 }

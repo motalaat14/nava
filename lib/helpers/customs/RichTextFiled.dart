@@ -18,6 +18,7 @@ class RichTextFiled extends StatelessWidget{
   final bool pass;
   final TextInputAction action;
   final Function(String value) submit;
+  final Function(String value) onChange;
   final Widget icon;
 
   RichTextFiled({
@@ -30,7 +31,7 @@ class RichTextFiled extends StatelessWidget{
     this.readOnly=false,
     this.action,
     this.submit,
-    this.icon, this.labelColor, this.pass
+    this.icon, this.labelColor, this.pass, this.onChange
   });
 
 
@@ -50,7 +51,7 @@ class RichTextFiled extends StatelessWidget{
         readOnly: readOnly,
         style: GoogleFonts.almarai(fontSize:20,color: MyColors.primary),
         validator: (value)=> validate(value),
-
+        onChanged: onChange,
         decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: MyColors.grey.withOpacity(.5),width: 1),

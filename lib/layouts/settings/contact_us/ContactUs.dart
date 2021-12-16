@@ -59,6 +59,9 @@ class _ContactUsState extends State<ContactUs> {
         setState(()=>isLoading=false);
         print(responseData);
         if (responseData["key"] == "success") {
+          _name.text="";
+          _mail.text="";
+          _msg.text="";
           print("------------ success ------------");
           Fluttertoast.showToast(msg: responseData["msg"]);
         } else {
@@ -82,8 +85,9 @@ class _ContactUsState extends State<ContactUs> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("contactUs"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("contactUs"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -110,144 +114,147 @@ class _ContactUsState extends State<ContactUs> {
         ),
       ),
 
-      body:SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              width: 110,
-              height: 120,
-              margin: EdgeInsets.symmetric(vertical: 15),
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(Res.logo), fit: BoxFit.contain),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${tr("name")}",
-                    ),
-                    RichTextFiled(
-                      margin: EdgeInsets.only(top: 5),
-                      label: tr("enterName"),
-                      type: TextInputType.text,
-                      controller: _name,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        "${tr("mail")}",
-                      ),
-                    ),
-                    RichTextFiled(
-                      margin: EdgeInsets.only(top: 5),
-                      label: tr("enterEmail"),
-                      type: TextInputType.emailAddress,
-                      controller: _mail,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        tr("yourMsg"),
-                      ),
-                    ),
-                    LabelTextField(
-                      margin: EdgeInsets.only(top: 5),
-                      label: tr("enterYourMsg"),
-                      type: TextInputType.emailAddress,
-                      lines: 7,
-                      controller: _msg,
-                    ),
-
-
-                    isLoading?
-                    Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 30),
-                        child: SpinKitDoubleBounce(color: MyColors.accent, size: 30.0))
-                        :
-                    CustomButton(
-                      title: tr("send"),
-                      onTap: () {
-                        if(_name.text==""||_mail.text==""||_msg.text==""){
-                          Fluttertoast.showToast(msg: tr("plzFillFields"));
-                        }else{
-                          contactUs();
-                        }
-                      },
-                      margin: EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-                    ),
-                    Center(
-                            child: Column(
-                              children: [
-                                Text(
-                                  tr("viaSocial"),
-                                  style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: MyColors.primary),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
-                                  child: Text(
-                                    tr("contactViaSocial"),
-                                    style: TextStyle(fontSize: 13,color: MyColors.offPrimary),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                loading ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
-                                  child: SpinKitThreeBounce(color: MyColors.accent, size: 30.0),
-                                ) :
-                                Container(
-                                  height: 70,
-                                  width: MediaQuery.of(context).size.width * .5,
-                                  margin: EdgeInsets.only(
-                                    bottom: 30,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          launchURL(url: contactModel.data.socialData[0].value);},
-                                        child: Icon(Mdi.facebook, size: 50, color: Colors.indigoAccent),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          launchURL(url: contactModel.data.socialData[1].value);},
-                                        child: Icon(Mdi.twitter, size: 50, color: Colors.blue),
-                                      ),
-                                      InkWell(
-                                        onTap: () {
-                                          launchURL(url: contactModel.data.socialData[2].value);},
-                                        child: Icon(Mdi.instagram, size: 50, color: Colors.redAccent),
-                                      ),
-
-                                      InkWell(
-                                        onTap: () {
-                                          launchURL(url: contactModel.data.socialData[3].value);},
-                                        child: Icon(Mdi.linkedin, size: 50, color: Colors.lightBlueAccent),
-                                      ),
-
-
-
-                                    ],
-                                  ),
-
-
-
-
-
-                                ),
-                              ],
-                            ),
-                          )
-                  ],
+      body:Container(
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                width: 110,
+                height: 120,
+                margin: EdgeInsets.symmetric(vertical: 15),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(Res.logo), fit: BoxFit.contain),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${tr("name")}",
+                      ),
+                      RichTextFiled(
+                        margin: EdgeInsets.only(top: 5),
+                        label: tr("enterName"),
+                        type: TextInputType.text,
+                        controller: _name,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          "${tr("mail")}",
+                        ),
+                      ),
+                      RichTextFiled(
+                        margin: EdgeInsets.only(top: 5),
+                        label: tr("enterEmail"),
+                        type: TextInputType.emailAddress,
+                        controller: _mail,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Text(
+                          tr("yourMsg"),
+                        ),
+                      ),
+                      LabelTextField(
+                        margin: EdgeInsets.only(top: 5),
+                        label: tr("enterYourMsg"),
+                        type: TextInputType.emailAddress,
+                        lines: 7,
+                        controller: _msg,
+                      ),
+
+
+                      isLoading?
+                      Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 30),
+                          child: SpinKitDoubleBounce(color: MyColors.accent, size: 30.0))
+                          :
+                      CustomButton(
+                        title: tr("send"),
+                        onTap: () {
+                          if(_name.text==""||_mail.text==""||_msg.text==""){
+                            Fluttertoast.showToast(msg: tr("plzFillFields"));
+                          }else{
+                            contactUs();
+                          }
+                        },
+                        margin: EdgeInsets.symmetric(horizontal: 0, vertical: 20),
+                      ),
+                      Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    tr("viaSocial"),
+                                    style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,color: MyColors.primary),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    child: Text(
+                                      tr("contactViaSocial"),
+                                      style: TextStyle(fontSize: 13,color: MyColors.offPrimary),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                  loading ? Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 15),
+                                    child: SpinKitThreeBounce(color: MyColors.accent, size: 30.0),
+                                  ) :
+                                  Container(
+                                    height: 70,
+                                    width: MediaQuery.of(context).size.width * .5,
+                                    margin: EdgeInsets.only(
+                                      bottom: 30,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        InkWell(
+                                          onTap: () {
+                                            launchURL(url: contactModel.data.socialData[0].value);},
+                                          child: Icon(Mdi.facebook, size: 50, color: Colors.indigoAccent),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            launchURL(url: contactModel.data.socialData[1].value);},
+                                          child: Icon(Mdi.twitter, size: 50, color: Colors.blue),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            launchURL(url: contactModel.data.socialData[2].value);},
+                                          child: Icon(Mdi.instagram, size: 50, color: Colors.redAccent),
+                                        ),
+
+                                        InkWell(
+                                          onTap: () {
+                                            launchURL(url: contactModel.data.socialData[3].value);},
+                                          child: Icon(Mdi.linkedin, size: 50, color: Colors.lightBlueAccent),
+                                        ),
+
+
+
+                                      ],
+                                    ),
+
+
+
+
+
+                                  ),
+                                ],
+                              ),
+                            )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

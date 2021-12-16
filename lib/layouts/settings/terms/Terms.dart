@@ -45,8 +45,9 @@ class _TermsState extends State<Terms> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("terms"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("terms"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -76,21 +77,25 @@ class _TermsState extends State<Terms> {
       key: _scaffold,
       body: loading
           ? MyLoading()
-          : Center(
-              child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(
-                children: [
-                  Text(
-                    termsModel.data.desc,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+          : Container(
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
+
+        child: Center(
+                child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
+                child: Column(
+                  children: [
+                    Text(
+                      termsModel.data.desc,
+                      style: TextStyle(
+                        fontSize: 16,
+                          height: 1.3
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )),
+                  ],
+                ),
+              )),
+          ),
     );
   }
 

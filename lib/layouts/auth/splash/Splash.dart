@@ -6,8 +6,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:nava/helpers/GlobalNotification.dart';
+import 'package:nava/helpers/providers/visitor_provider.dart';
 import 'package:nava/layouts/Home/Home.dart';
 import 'package:nava/layouts/auth/select_lang/SelectLang.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../res.dart';
 
@@ -25,7 +27,7 @@ class _SplashState extends State<Splash> {
 
   @override
   void initState() {
-    GlobalNotification.instance.setupNotification(widget.navigatorKey);
+    // GlobalNotification.instance.setupNotification(widget.navigatorKey);
     _splashTimer();
     getUuid();
     super.initState();
@@ -63,16 +65,17 @@ class _SplashState extends State<Splash> {
       print("_____________________________________04 ar");
     }
 
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
     if(preferences.getString("userId")!=null){
+      visitorProvider.visitor = false;
       print("---------------- user id == ${preferences.getString("userId")}");
       print("---------------- token == ${preferences.getString("token")}");
-      print("---------------- fcmToken == ${preferences.getString("fcmToken")}");
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
     }else{
+      visitorProvider.visitor = true;
       changeLanguage("ar",context);
       print("---------------- user id == ${preferences.getString("userId")}");
       print("---------------- token == ${preferences.getString("token")}");
-      print("---------------- fcmToken == ${preferences.getString("fcmToken")}");
       print("---------------- lang == ${preferences.getString("lang")}");
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>SelectLang()), (route) => false);
     }

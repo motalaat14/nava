@@ -66,8 +66,9 @@ class _ProfileState extends State<Profile> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("profile"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("profile"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -98,106 +99,109 @@ class _ProfileState extends State<Profile> {
       loading ?
           MyLoading()
           :
-      Padding(
-        padding: EdgeInsets.only(top: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Center(
-                  child: InkWell(
-                    onTap:(){
-                      _openImagePicker(context);
-                    },
-                    child: Stack(
-                      children: [
-                        Container(
-                          width: 150,
-                          height: 150,
-                          decoration: BoxDecoration(
-                              color: MyColors.primary.withOpacity(.2),
-                              borderRadius: BorderRadius.circular(100),
-                              border:Border.all(width: 2,color: MyColors.primary),
-                              image: DecorationImage(image: NetworkImage(profileModel.data.avatar),fit: BoxFit.cover)
-                          ),
-                        ),
-                        Container(
-                          width: 30,
-                          height:30,
-                          decoration: BoxDecoration(
-                              color: MyColors.primary,
-                              borderRadius: BorderRadius.circular(50),
-                              border:Border.all(width: 1,color: MyColors.primary)
-                          ),
-                          child: Icon(Icons.camera_alt_outlined,size: 20,color: MyColors.white,),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(tr("name"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                        RichTextFiled(
-                          controller: name,
-                          label: tr("name"),
-                          type: TextInputType.emailAddress,
-                          margin: EdgeInsets.only(top: 8,bottom: 10),
-                          action: TextInputAction.next,
-                        ),
-                        Text(tr("mail"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                        RichTextFiled(
-                          controller: mail,
-                          label: tr("mail"),
-                          type: TextInputType.emailAddress,
-                          margin: EdgeInsets.only(top: 8,bottom: 10),
-                          action: TextInputAction.next,
-                        ),
-                        Text(tr("phone"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-                        RichTextFiled(
-                          controller: phone,
-                          label: tr("phone"),
-                          type: TextInputType.emailAddress,
-                          margin: EdgeInsets.only(top: 8,bottom: 10),
-                          action: TextInputAction.next,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-              child: Column(
+      Container(
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
+        child: Padding(
+          padding: EdgeInsets.only(top: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
                 children: [
-                  CustomButton(
-                    title: tr("changePass"),
-                    textColor: MyColors.primary,
-                    margin: EdgeInsets.symmetric(vertical: 0),
-                    color: MyColors.white,
-                    borderColor: MyColors.primary,
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (c)=>ChangePassword()));
-                    },
+                  Center(
+                    child: InkWell(
+                      onTap:(){
+                        _openImagePicker(context);
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                                color: MyColors.primary.withOpacity(.2),
+                                borderRadius: BorderRadius.circular(100),
+                                border:Border.all(width: 2,color: MyColors.primary),
+                                image: DecorationImage(image: NetworkImage(profileModel.data.avatar),fit: BoxFit.cover)
+                            ),
+                          ),
+                          Container(
+                            width: 30,
+                            height:30,
+                            decoration: BoxDecoration(
+                                color: MyColors.primary,
+                                borderRadius: BorderRadius.circular(50),
+                                border:Border.all(width: 1,color: MyColors.primary)
+                            ),
+                            child: Icon(Icons.camera_alt_outlined,size: 20,color: MyColors.white,),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  CustomButton(
-                    title: tr("saveChanges"),
-                    margin: EdgeInsets.symmetric(vertical: 10),
-                    onTap: (){
-                      updateProfile();
-                    },
+                  Form(
+                    key: _formKey,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tr("name"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                          RichTextFiled(
+                            controller: name,
+                            label: tr("name"),
+                            type: TextInputType.emailAddress,
+                            margin: EdgeInsets.only(top: 8,bottom: 10),
+                            action: TextInputAction.next,
+                          ),
+                          Text(tr("mail"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                          RichTextFiled(
+                            controller: mail,
+                            label: tr("mail"),
+                            type: TextInputType.emailAddress,
+                            margin: EdgeInsets.only(top: 8,bottom: 10),
+                            action: TextInputAction.next,
+                          ),
+                          Text(tr("phone"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                          RichTextFiled(
+                            controller: phone,
+                            label: tr("phone"),
+                            type: TextInputType.emailAddress,
+                            margin: EdgeInsets.only(top: 8,bottom: 10),
+                            action: TextInputAction.next,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                child: Column(
+                  children: [
+                    CustomButton(
+                      title: tr("changePass"),
+                      textColor: MyColors.primary,
+                      margin: EdgeInsets.symmetric(vertical: 0),
+                      color: MyColors.white,
+                      borderColor: MyColors.primary,
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (c)=>ChangePassword()));
+                      },
+                    ),
+                    CustomButton(
+                      title: tr("saveChanges"),
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      onTap: (){
+                        updateProfile();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

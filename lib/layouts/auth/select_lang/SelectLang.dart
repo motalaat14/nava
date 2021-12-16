@@ -34,9 +34,7 @@ class _SelectLangState extends State<SelectLang> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-            image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)
-        ),
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
         child: ListView(
           padding: EdgeInsets.symmetric(vertical: 50,horizontal: 15),
           children: [

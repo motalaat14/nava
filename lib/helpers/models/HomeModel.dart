@@ -17,43 +17,23 @@ class HomeModel {
 
   String key;
   String msg;
-  Data data;
+  List<Datum> data;
 
   factory HomeModel.fromJson(Map<String, dynamic> json) => HomeModel(
     key: json["key"],
     msg: json["msg"],
-    data: Data.fromJson(json["data"]),
+    data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
     "key": key,
     "msg": msg,
-    "data": data.toJson(),
+    "data": List<dynamic>.from(data.map((x) => x.toJson())),
   };
 }
 
-class Data {
-  Data({
-    this.sliders,
-    this.categories,
-  });
-
-  List<Category> sliders;
-  List<Category> categories;
-
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-    sliders: List<Category>.from(json["sliders"].map((x) => Category.fromJson(x))),
-    categories: List<Category>.from(json["categories"].map((x) => Category.fromJson(x))),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "sliders": List<dynamic>.from(sliders.map((x) => x.toJson())),
-    "categories": List<dynamic>.from(categories.map((x) => x.toJson())),
-  };
-}
-
-class Category {
-  Category({
+class Datum {
+  Datum({
     this.id,
     this.title,
     this.image,
@@ -63,7 +43,7 @@ class Category {
   String title;
   String image;
 
-  factory Category.fromJson(Map<String, dynamic> json) => Category(
+  factory Datum.fromJson(Map<String, dynamic> json) => Datum(
     id: json["id"],
     title: json["title"],
     image: json["image"],

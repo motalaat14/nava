@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nava/layouts/auth/login/Login.dart';
 
 import 'MyColors.dart';
@@ -10,7 +12,7 @@ import 'MyColors.dart';
 class LoadingDialog {
   static showLoadingDialog() {
     EasyLoading.show(
-        maskType: EasyLoadingMaskType.none,
+        maskType: EasyLoadingMaskType.clear,
         dismissOnTap: false,
         indicator: SpinKitFadingGrid(
           size: 50.0,
@@ -24,6 +26,9 @@ class LoadingDialog {
         ),
         status: tr("loading"));
   }
+
+
+
 
   static showLoadingView() {
     return SpinKitCubeGrid(
@@ -48,11 +53,47 @@ class LoadingDialog {
     return showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
-        return _alertDialog(
-            "قم بتسجيل الدخول للمتابعة",
-            () => Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Login()), (route) => false),
-            context,
-            "دخول");
+        return
+
+          CupertinoAlertDialog(
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Lottie.asset("assets/anim/visitor02.json",width: 120),
+                ),
+                Text("قم بتسجيل الدخول للمتابعة",style: GoogleFonts.almarai(fontSize: 14,color: MyColors.grey),),
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Text("تسجيل الدخول",style: GoogleFonts.almarai(fontSize: 20,color: MyColors.offPrimary,fontWeight: FontWeight.bold)),
+                )
+              ],
+            ),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(tr("back"),
+                  style: GoogleFonts.almarai(
+                    fontSize: 14,
+                    color: MyColors.blackOpacity,
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+              CupertinoDialogAction(
+                child: Text(tr("login"),
+                  style: GoogleFonts.almarai(
+                    fontSize: 14,
+                    color: MyColors.blackOpacity,
+                  ),
+                ),
+                onPressed: (){
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Login()), (route) => false);
+                },
+              ),
+            ],
+          );
       },
     );
   }

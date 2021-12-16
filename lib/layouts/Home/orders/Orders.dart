@@ -2,9 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/customs/Visitor.dart';
+import 'package:nava/helpers/providers/visitor_provider.dart';
 import 'package:nava/layouts/Home/orders/FinishedOrders.dart';
 import 'package:nava/layouts/Home/orders/ProcessingOredrs.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
+import 'package:provider/provider.dart';
 
 import '../../../res.dart';
 
@@ -23,12 +26,15 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin{
 
   @override
   Widget build(BuildContext context) {
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
+
     return DefaultTabController(
       initialIndex: 0,
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(tr("orders")),
+          backgroundColor: MyColors.primary,
+          title: Text(tr("orders"),style: TextStyle(fontSize: 20),),
           elevation: 0,
           actions: [
             InkWell(
@@ -43,7 +49,14 @@ class _OrdersState extends State<Orders> with TickerProviderStateMixin{
           ],
         ),
 
-        body: ListView(
+        body:
+
+        visitorProvider.visitor?
+
+        Visitor()
+
+            :
+        ListView(
           children: [
             Container(
               height: 45,

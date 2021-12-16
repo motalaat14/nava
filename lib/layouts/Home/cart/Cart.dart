@@ -23,8 +23,7 @@ import 'package:nava/helpers/models/SubCategoryDetailsModel.dart';
 import 'package:nava/layouts/Home/main/SubCategoryDetails.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../res.dart';
+import '../Home.dart';
 import 'AddNotesAndImages.dart';
 import 'Address.dart';
 
@@ -53,8 +52,9 @@ class _CartState extends State<Cart> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("orderSummary"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("orderSummary"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -64,7 +64,10 @@ class _CartState extends State<Cart> {
               actions: [
                 InkWell(
                   onTap: () {
-                    // Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                    // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
+                    // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -81,14 +84,14 @@ class _CartState extends State<Cart> {
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * .88,
+            height: MediaQuery.of(context).size.height * .86,
             child:
             loading ? MyLoading():
             Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * .63,
+                  height: MediaQuery.of(context).size.height * .6,
                   child: ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 15),
                       itemCount: cartModel.data.services.length,
@@ -103,7 +106,7 @@ class _CartState extends State<Cart> {
 
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height * .24,
+                  height: MediaQuery.of(context).size.height * .25,
                   decoration: BoxDecoration(
                       color: MyColors.white,
                       border: Border.all(color: MyColors.grey, width: .5),
@@ -230,18 +233,23 @@ class _CartState extends State<Cart> {
                           )), (route) => false);
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Icon(Icons.edit,color: MyColors.primary,),
                         ),
                       ),
-                      Icon(CupertinoIcons.delete,color: MyColors.red,),
+                      InkWell(
+                          onTap: (){
+                            deleteCartItem(id: id.toString());
+                          },
+                          child: Icon(CupertinoIcons.delete,color: MyColors.red,)
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
             Container(
-              height: cartModel.data.services[index].services.length*38.0,
+              height: cartModel.data.services[index].services.length*30.0,
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 itemCount: cartModel.data.services[index].services.length,
@@ -259,7 +267,7 @@ class _CartState extends State<Cart> {
 
   Widget cartServiceItem({String title,price}){
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -287,15 +295,23 @@ class _CartState extends State<Cart> {
           "lang": preferences.getString("lang"),
           "uuid": preferences.getString("uuid"),
         },
-      ).timeout(Duration(seconds: 10), onTimeout: () {
-        throw 'no internet please connect to internet';
-      });
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet';});
       final responseData = json.decode(response.body);
       if (response.statusCode == 200) {
         setState(() => loading = false);
         print(responseData);
+        print(responseData);
         if (responseData["key"] == "success") {
-          cartModel = CartModel.fromJson(responseData);
+          if(responseData["data"]["services"] == null){
+            print("________________________ empty");
+            Navigator.of(context).pop();
+          }else if(responseData["data"]["total"] == "0"){
+            print("________________________ empty []");
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
+          }else{
+            cartModel = CartModel.fromJson(responseData);
+            print("________________________ not");
+          }
         } else {
           Fluttertoast.showToast(msg: responseData["msg"]);
         }
@@ -305,7 +321,38 @@ class _CartState extends State<Cart> {
     }
   }
 
-
-
+  Future deleteCartItem({String id}) async {
+    LoadingDialog.showLoadingDialog();
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    print(preferences.getString("token"));
+    print(cartModel.data.id.toString());
+    print(id);
+    final url = Uri.https(URL, "api/delete-cart-item");
+    try {
+      final response = await http.post(url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          "order_id": cartModel.data.id.toString(),
+          "sub_category_id": id,
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        EasyLoading.dismiss();
+        print(responseData);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          getCart();
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }else{
+        print("${response.statusCode}");
+      }
+    } catch (e, t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
 
 }

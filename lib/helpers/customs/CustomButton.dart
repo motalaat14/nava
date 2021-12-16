@@ -32,7 +32,7 @@ class CustomButton extends StatelessWidget{
         margin: margin?? EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: color??MyColors.primary,
-          borderRadius: borderRadius?? BorderRadius.circular(15),
+          borderRadius: borderRadius?? BorderRadius.circular(10),
           border: Border.all(color: borderColor??border,width: 2)
         ),
         alignment: Alignment.center,

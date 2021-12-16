@@ -33,16 +33,26 @@ class _ForgetPasswordState extends State<ForgetPassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffold,
+      appBar: AppBar(
+        backgroundColor: MyColors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios,color: MyColors.offPrimary,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: Center(
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 10),
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 60),
+              padding: const EdgeInsets.only(top: 0),
               child: Image(
                 image: AssetImage(Res.logo),
                 fit: BoxFit.contain,
-                height: 120,
+                height: 110,
               ),
             ),
 
@@ -88,20 +98,15 @@ class _ForgetPasswordState extends State<ForgetPassword> {
 
   Future forgetPassword() async {
     SharedPreferences preferences =await SharedPreferences.getInstance();
-    // if(_new.text==""||_conform.text==""){
-    //   Fluttertoast.showToast(msg: "ادخل كلمة المرور الجديدة",);
-    // }else if(_new.text!=_conform.text){
-    //   Fluttertoast.showToast(msg: "كلمتي المرور غير متطابقتين",);
-    // }else{
       LoadingDialog.showLoadingDialog();
-      final url = Uri.https(URL, "api/forget_password_code");
+      final url = Uri.https(URL, "api/send-active-code");
       try {
         final response = await http.post(url,
           body: {
             "phone": "${_phone.text}",
             "lang": "${preferences.getString("lang")}",
           },
-        ).timeout( Duration(seconds: 7), onTimeout: () {throw 'no internet please connect to internet';},);
+        ).timeout( Duration(seconds: 7), onTimeout: () {throw 'no internet';},);
         final responseData = json.decode(response.body);
         if (response.statusCode == 200) {
           EasyLoading.dismiss();

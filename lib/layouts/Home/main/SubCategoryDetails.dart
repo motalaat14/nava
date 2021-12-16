@@ -26,10 +26,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Home.dart';
 
 class SubCategoryDetails extends StatefulWidget {
-  final int id,categoryId;
+  final int id, categoryId;
   final String name, img;
 
-  const SubCategoryDetails({Key key, this.id, this.name, this.img, this.categoryId})
+  const SubCategoryDetails(
+      {Key key, this.id, this.name, this.img, this.categoryId})
       : super(key: key);
 
   @override
@@ -52,28 +53,31 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
               title: Text(
                 widget.name,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: 18),
               ),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (c)=>Home()), (route) => false);
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (c) => Home()),
+                      (route) => false);
                 },
               ),
               actions: [
                 Container(
+                  width: 50,
+                  height: 40,
                   decoration: BoxDecoration(
                       border: Border.all(width: .5),
-                      borderRadius: BorderRadius.circular(10)),
-                  margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-                  padding: const EdgeInsets.all(5),
-                  child: Image(
-                      image: NetworkImage(widget.img),
-                      color: MyColors.black,
-                      width: 25),
+                      borderRadius: BorderRadius.circular(5),
+                      image: DecorationImage(
+                          image: NetworkImage(widget.img), fit: BoxFit.cover)),
+                  margin: const EdgeInsets.only(top: 10, left: 15, right: 15),
+                  padding: const EdgeInsets.all(1),
                 ),
               ],
             ),
@@ -81,19 +85,19 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
           ],
         ),
       ),
-
       body: Column(
         children: [
           Container(
-            height: MediaQuery.of(context).size.height * .888,
-            child: loading ? MyLoading()
+            height: MediaQuery.of(context).size.height * .87,
+            child: loading
+                ? MyLoading()
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        height: MediaQuery.of(context).size.height * .625,
+                        height: MediaQuery.of(context).size.height * .595,
                         child: ListView.builder(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
+                            padding: EdgeInsets.symmetric(horizontal: 15),
                             itemCount:
                                 subCategoryDetailsModel.data.services.length,
                             itemBuilder: (c, i) {
@@ -104,111 +108,280 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                 padding: EdgeInsets.only(top: 8),
                                 decoration: BoxDecoration(
                                   color: MyColors.white,
-                                  border: Border.all(width: .5,color: MyColors.grey),
+                                  border: Border.all(
+                                      width: .5, color: MyColors.grey),
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           InkWell(
-                                            onTap:(){
-                                              if(subCategoryDetailsModel.data.services[i].checked){
-                                                if(i==0){
-                                                  addToCart(counter: "down",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "0");
-                                                }else{
-                                                  addToCart(counter: "down",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "1");
+                                            onTap: () {
+                                              if (subCategoryDetailsModel
+                                                  .data.services[i].checked) {
+                                                if (i == 0) {
+                                                  addToCart(
+                                                      counter: "down",
+                                                      serviceId:
+                                                          subCategoryDetailsModel
+                                                              .data
+                                                              .services[i]
+                                                              .id
+                                                              .toString(),
+                                                      unchecked: "0");
+                                                } else {
+                                                  addToCart(
+                                                      counter: "down",
+                                                      serviceId:
+                                                          subCategoryDetailsModel
+                                                              .data
+                                                              .services[i]
+                                                              .id
+                                                              .toString(),
+                                                      unchecked: "1");
                                                 }
-                                              }else{
-                                                addToCart(counter: "up",serviceId: subCategoryDetailsModel.data.services[i].id.toString(),unchecked: "0");
+                                              } else {
+                                                addToCart(
+                                                    counter: "up",
+                                                    serviceId:
+                                                        subCategoryDetailsModel
+                                                            .data.services[i].id
+                                                            .toString(),
+                                                    unchecked: "0");
                                               }
                                               setState(() {
-                                                subCategoryDetailsModel.data.services[i].checked = !subCategoryDetailsModel.data.services[i].checked;
+                                                subCategoryDetailsModel.data
+                                                        .services[i].checked =
+                                                    !subCategoryDetailsModel
+                                                        .data
+                                                        .services[i]
+                                                        .checked;
                                               });
-                                              },
+                                            },
                                             child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                Icon(subCategoryDetailsModel.data.services[i].checked ? Icons.check_circle : Icons.radio_button_unchecked,color: MyColors.primary,),
+                                                Icon(
+                                                  subCategoryDetailsModel.data
+                                                          .services[i].checked
+                                                      ? Icons.check_circle
+                                                      : Icons
+                                                          .radio_button_unchecked,
+                                                  color: MyColors.primary,
+                                                ),
                                                 Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                  child: Text(subCategoryDetailsModel.data.services[i].title,style: TextStyle(fontWeight: FontWeight.bold),),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(horizontal: 5),
+                                                  child: Text(
+                                                    subCategoryDetailsModel
+                                                        .data.services[i].title,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                          i==0 ? Row(
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(horizontal: 2),
-                                                child: Text(subCategoryDetailsModel.data.services[i].price.toString().toString(),style: TextStyle(fontWeight: FontWeight.bold,color: MyColors.primary),),
-                                              ),
-                                              Text(tr("rs"),style: TextStyle(fontSize: 12,color: MyColors.primary),),
-                                            ],
-                                          ) :Container(),
+                                          i == 0
+                                              ? Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                              .symmetric(
+                                                          horizontal: 2),
+                                                      child: Text(
+                                                        subCategoryDetailsModel
+                                                            .data
+                                                            .services[i]
+                                                            .price
+                                                            .toString()
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: MyColors
+                                                                .primary),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      tr("rs"),
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          color:
+                                                              MyColors.primary),
+                                                    ),
+                                                  ],
+                                                )
+                                              : Container(),
                                         ],
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
-                                        child: Text(subCategoryDetailsModel.data.services[i].description,style: TextStyle(fontSize: 12,color: MyColors.grey,fontWeight: FontWeight.bold),),
-                                      ),
-                                      i!=0 ? Padding(
-                                        padding: const EdgeInsets.only(bottom: 8),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                                                  child: Text(subCategoryDetailsModel.data.services[i].price.toString(),style: TextStyle(fontWeight: FontWeight.bold,color: MyColors.primary),),
-                                                ),
-                                                Text(tr("rs"),style: TextStyle(fontSize: 12,color: MyColors.primary),),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: <Widget>[
-                                                InkWell(
-                                                  onTap: (){
-
-                                                    addToCart(
-                                                      serviceId: subCategoryDetailsModel.data.services[i].id.toString(),
-                                                      counter: "up",
-                                                      unchecked: "0",
-                                                    );
-
-                                                    setState(() {
-                                                      subCategoryDetailsModel.data.services[i].count++;
-                                                    });
-                                                  },
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.all(5),
-                                                    child: Icon(Icons.add_circle_outline,size: 28,color: MyColors.primary,),
-                                                  ),
-                                                ),
-                                                Text(subCategoryDetailsModel.data.services[i].count.toString(),style: TextStyle(fontWeight: FontWeight.bold,color: MyColors.primary,fontSize: 18),),
-                                                InkWell(
-                                                    onTap: (){
-                                                      if(subCategoryDetailsModel.data.services[i].count>1){
-                                                        setState(() {
-                                                          subCategoryDetailsModel.data.services[i].count--;
-                                                        });
-                                                      }
-                                                    },
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.all(5),
-                                                      child: Icon(Icons.remove_circle_outline,size: 28,color: subCategoryDetailsModel.data.services[i].count>1 ? MyColors.primary:MyColors.grey,),
-                                                    )
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 5, vertical: 10),
+                                        child: Text(
+                                          subCategoryDetailsModel
+                                              .data.services[i].description,
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: MyColors.grey,
+                                              fontWeight: FontWeight.bold),
                                         ),
-                                      ) :Container(),
+                                      ),
+                                      i != 0
+                                          ? Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 8),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .symmetric(
+                                                                horizontal: 2),
+                                                        child: Text(
+                                                          subCategoryDetailsModel
+                                                              .data
+                                                              .services[i]
+                                                              .price
+                                                              .toString(),
+                                                          style: TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: MyColors
+                                                                  .primary),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        tr("rs"),
+                                                        style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: MyColors
+                                                                .primary),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: <Widget>[
+                                                      InkWell(
+                                                        onTap: () {
+                                                          addToCart(
+                                                            serviceId:
+                                                                subCategoryDetailsModel
+                                                                    .data
+                                                                    .services[i]
+                                                                    .id
+                                                                    .toString(),
+                                                            counter: "up",
+                                                            unchecked: "0",
+                                                          );
+
+                                                          setState(() {
+                                                            subCategoryDetailsModel
+                                                                .data
+                                                                .services[i]
+                                                                .count++;
+                                                          });
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(5),
+                                                          child: Icon(
+                                                            Icons
+                                                                .add_circle_outline,
+                                                            size: 28,
+                                                            color: MyColors
+                                                                .primary,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        subCategoryDetailsModel
+                                                            .data
+                                                            .services[i]
+                                                            .count
+                                                            .toString(),
+                                                        style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: MyColors
+                                                                .primary,
+                                                            fontSize: 18),
+                                                      ),
+                                                      InkWell(
+                                                          onTap: () {
+                                                            if (subCategoryDetailsModel
+                                                                    .data
+                                                                    .services[i]
+                                                                    .count >=
+                                                                1) {
+                                                              addToCart(
+                                                                serviceId:
+                                                                    subCategoryDetailsModel
+                                                                        .data
+                                                                        .services[
+                                                                            i]
+                                                                        .id
+                                                                        .toString(),
+                                                                counter: "down",
+                                                                unchecked: "0",
+                                                              );
+                                                            }
+                                                            if (subCategoryDetailsModel
+                                                                    .data
+                                                                    .services[i]
+                                                                    .count ==
+                                                                0) {
+                                                              setState(() {
+                                                                subCategoryDetailsModel
+                                                                    .data
+                                                                    .services[i]
+                                                                    .checked = false;
+                                                              });
+                                                            }
+                                                          },
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(5),
+                                                            child: Icon(
+                                                              Icons
+                                                                  .remove_circle_outline,
+                                                              size: 28,
+                                                              color: subCategoryDetailsModel
+                                                                          .data
+                                                                          .services[
+                                                                              i]
+                                                                          .count >=
+                                                                      1
+                                                                  ? MyColors
+                                                                      .primary
+                                                                  : MyColors
+                                                                      .grey,
+                                                            ),
+                                                          )),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          : Container(),
                                     ],
                                   ),
                                 ),
@@ -217,7 +390,7 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                       ),
                       Container(
                         width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * .26,
+                        height: MediaQuery.of(context).size.height * .27,
                         decoration: BoxDecoration(
                             color: MyColors.white,
                             border: Border.all(color: MyColors.grey, width: .5),
@@ -225,61 +398,94 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
                                 topLeft: Radius.circular(30),
                                 topRight: Radius.circular(30))),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(tr("vat"), style: TextStyle(fontSize: 16)),
-                                  Row(
-                                    children: [
-                                      Text(addToCartModel.data==null?subCategoryDetailsModel.data.tax.toString():addToCartModel.data.tax.toString(),
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: MyColors.primary),
-                                      ),
-                                      Text(
-                                        tr("rs"),
-                                        style: TextStyle(fontSize: 14),
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Column(
                                   children: [
-                                    Text(tr("total"), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                                     Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(addToCartModel.data==null?subCategoryDetailsModel.data.price.toString():addToCartModel.data.price.toString(),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: MyColors.primary),
-                                        ),
-                                        Text(
-                                          tr("rs"),
-                                          style: TextStyle(fontSize: 14),
-                                        ),
+                                        Text(tr("vat"), style: TextStyle(fontSize: 16)),
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                                              child: Text(
+                                                addToCartModel.data == null
+                                                    ? subCategoryDetailsModel.data.tax.toString()
+                                                    : addToCartModel.data.tax.toString(),
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: MyColors.primary),
+                                              ),
+                                            ),
+                                            Text(
+                                              tr("rs"),
+                                              style: TextStyle(fontSize: 14),
+                                            ),
+                                          ],
+                                        )
                                       ],
-                                    )
+                                    ),
+                                    Padding(
+                                      padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            tr("total"),
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 5),
+                                                child: Text(
+                                                  addToCartModel.data == null
+                                                      ? subCategoryDetailsModel
+                                                      .data.price
+                                                      .toString()
+                                                      : addToCartModel.data.price
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: MyColors.primary),
+                                                ),
+                                              ),
+                                              Text(
+                                                tr("rs"),
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Divider(),
                                   ],
                                 ),
                               ),
-                              Divider(),
-                              Text(tr("longText01"), style: GoogleFonts.mada(fontSize: 13), textAlign: TextAlign.center),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 25),
+                                child: Text(tr("longText01"), style: GoogleFonts.ibmPlexSans(fontSize: 11.6,fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
+                              ),
                               CustomButton(
-                                margin: EdgeInsets.only(top: 8),
+                                margin: EdgeInsets.only(top: 5,left: 8,right: 8),
                                 title: tr("continue"),
                                 onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (c)=>Cart(categoryId: widget.categoryId,)));
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (c) => Cart(
+                                            categoryId: widget.categoryId,
+                                          )));
                                 },
                               ),
                             ],
@@ -294,9 +500,9 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
     );
   }
 
-  String total,vat;
-  AddToCartModel addToCartModel =AddToCartModel();
-  Future addToCart({String serviceId,counter, unchecked}) async {
+  String total, vat;
+  AddToCartModel addToCartModel = AddToCartModel();
+  Future addToCart({String serviceId, counter, unchecked}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     LoadingDialog.showLoadingDialog();
     print("----------------------------00");
@@ -311,7 +517,8 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
     final url = Uri.https(URL, "api/add-to-cart");
     print("----------------------------01");
     try {
-      final response = await http.post(url,
+      final response = await http.post(
+        url,
         headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
         body: {
           "lang": preferences.getString("lang"),
@@ -322,7 +529,9 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
           "counter": counter,
           "unchecked": unchecked,
         },
-      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      ).timeout(Duration(seconds: 10), onTimeout: () {
+        throw 'no internet please connect to internet';
+      });
       final responseData = json.decode(response.body);
       if (response.statusCode == 200) {
         EasyLoading.dismiss();
@@ -330,7 +539,7 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
         if (responseData["key"] == "success") {
           getSubCategoryDetails();
           setState(() {
-            addToCartModel =AddToCartModel.fromJson(responseData);
+            addToCartModel = AddToCartModel.fromJson(responseData);
           });
           Fluttertoast.showToast(msg: responseData["msg"]);
         } else {
@@ -343,9 +552,6 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
       print("error $e" + " ==>> track $t");
     }
   }
-
-
-
 
   bool loading = true;
   SubCategoryDetailsModel subCategoryDetailsModel = SubCategoryDetailsModel();
@@ -369,7 +575,8 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
         setState(() => loading = false);
         print(responseData);
         if (responseData["key"] == "success") {
-          subCategoryDetailsModel = SubCategoryDetailsModel.fromJson(responseData);
+          subCategoryDetailsModel =
+              SubCategoryDetailsModel.fromJson(responseData);
         } else {
           Fluttertoast.showToast(msg: responseData["msg"]);
         }
@@ -378,6 +585,4 @@ class _SubCategoryDetailsState extends State<SubCategoryDetails> {
       print("error $e" + " ==>> track $t");
     }
   }
-
-
 }

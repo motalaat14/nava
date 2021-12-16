@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,14 +9,19 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
 import 'package:nava/helpers/constants/base.dart';
+import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/RichTextFiled.dart';
 import 'package:nava/helpers/models/CitiesModel.dart';
 import 'package:nava/helpers/models/HomeModel.dart';
+import 'package:nava/helpers/models/HomeSliderModel.dart';
+import 'package:nava/helpers/providers/visitor_provider.dart';
 import 'package:nava/layouts/Home/main/SubCaregories.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../res.dart';
+import 'dart:async';
 
 class Main extends StatefulWidget {
   @override
@@ -31,10 +35,18 @@ class _MainState extends State<Main> {
   String name = "";
   initData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    setState(() {
-      name = preferences.getString("name");
-      city = preferences.getString("cityName") ?? tr("selectCity");
-    });
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
+    if(visitorProvider.visitor){
+      setState(() {
+        name = "";
+        city = preferences.getString("cityName") ?? tr("selectCity");
+      });
+    }else {
+      setState(() {
+        name = preferences.getString("name");
+        city = preferences.getString("cityName") ?? tr("selectCity");
+      });
+    }
   }
 
   @override
@@ -42,15 +54,19 @@ class _MainState extends State<Main> {
     initData();
     getCities();
     getHome();
+    getHomeSlider();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: PreferredSize(
+
         preferredSize: Size.fromHeight(70),
         child: AppBar(
+          backgroundColor: MyColors.primary,
           title: Padding(
             padding: const EdgeInsets.only(top: 5),
             child: Column(
@@ -58,7 +74,7 @@ class _MainState extends State<Main> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   child: Row(
                     children: [
                       Text(
@@ -78,14 +94,25 @@ class _MainState extends State<Main> {
                       selectCity(context);
                     }
                   },
-                  child: Row(
-                    children: [
-                      Text(
-                        city,
-                        style: TextStyle(fontSize: 12),
+                  child: Container(
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(color: MyColors.white)
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            city,
+                            style: TextStyle(fontSize: 13.5),
+                          ),
+                          Icon(Icons.expand_more),
+                        ],
                       ),
-                      Icon(Icons.expand_more),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -96,8 +123,7 @@ class _MainState extends State<Main> {
           actions: [
             InkWell(
               onTap: () {
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (c) => ContactUs()));
+                Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -131,7 +157,7 @@ class _MainState extends State<Main> {
                       ),
                       Column(
                         children: [
-                          loading
+                          sliderLoading
                               ? Container(
                                   height: 140,
                                   child: SpinKitDoubleBounce(
@@ -142,7 +168,7 @@ class _MainState extends State<Main> {
                                   child: Swiper(
                                     duration: 1000,
                                     autoplay: true,
-                                    itemCount: homeModel.data.sliders.length,
+                                    itemCount: homeSliderModel.data.sliders.length,
                                     fade: .6,
                                     viewportFraction: .86,
                                     scrollDirection: Axis.horizontal,
@@ -161,7 +187,7 @@ class _MainState extends State<Main> {
                                           color:
                                               MyColors.accent.withOpacity(.1),
                                           image: DecorationImage(
-                                              image: NetworkImage(homeModel
+                                              image: NetworkImage(homeSliderModel
                                                   .data.sliders[i].image),
                                               fit: BoxFit.cover),
                                         ),
@@ -178,7 +204,10 @@ class _MainState extends State<Main> {
             ),
           ];
         },
-        body: Column(
+        body:
+
+
+        Column(
           children: [
             Stack(
               children: [
@@ -198,6 +227,9 @@ class _MainState extends State<Main> {
                   controller: search,
                   label: tr("searchWord"),
                   labelColor: MyColors.grey,
+                  onChange: (word){
+                    getSearch();
+                  },
                 ),
               ],
             ),
@@ -220,12 +252,12 @@ class _MainState extends State<Main> {
                         crossAxisSpacing: 5,
                         mainAxisSpacing: 5,
                       ),
-                      itemCount: homeModel.data.categories.length,
+                      itemCount: homeModel.data.length,
                       itemBuilder: (c, i) {
                         return categoryItem(
-                          id: homeModel.data.categories[i].id,
-                          img: homeModel.data.categories[i].image,
-                          title: homeModel.data.categories[i].title,
+                          id: homeModel.data[i].id,
+                          img: homeModel.data[i].image,
+                          title: homeModel.data[i].title,
                         );
                       },
                     ),
@@ -270,7 +302,7 @@ class _MainState extends State<Main> {
                               child: Image(
                                 image: NetworkImage(img),
                                 width: 20,
-                                color: MyColors.black,
+                                color: MyColors.offPrimary,
                               ),
                               foregroundColor: MyColors.black,
                               backgroundColor: MyColors.primary.withOpacity(.2),
@@ -434,4 +466,68 @@ class _MainState extends State<Main> {
       print("track $t");
     }
   }
+
+  bool sliderLoading = true;
+  HomeSliderModel homeSliderModel = HomeSliderModel();
+  Future getHomeSlider({int cityId}) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {sliderLoading = true;});
+    final url = Uri.https(URL, "api/slider-home");
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          "city_id": cityId ==null ? preferences.getInt("cityId").toString():cityId.toString(),
+          "device_type": Platform.isIOS ? "ios" : "android",
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet please connect to internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => sliderLoading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          homeSliderModel = HomeSliderModel.fromJson(responseData);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e");
+      print("track $t");
+    }
+  }
+
+  Future getSearch() async {
+    print("-----------------search-------------------");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    setState(() {loading = true;});
+    final url = Uri.https(URL, "api/search");
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Authorization": "Bearer ${preferences.getString("token")}"},
+        body: {
+          "lang": preferences.getString("lang"),
+          "search_key": search.text,
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () {throw 'no internet';});
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        setState(() => loading = false);
+        print(responseData);
+        if (responseData["key"] == "success") {
+          homeModel = HomeModel.fromJson(responseData);
+        } else {
+          // Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e, t) {
+      print("error $e");
+      print("track $t");
+    }
+  }
+
+
 }

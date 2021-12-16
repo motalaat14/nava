@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
 import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
+import 'package:nava/helpers/customs/Visitor.dart';
+import 'package:nava/helpers/providers/visitor_provider.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
+import 'package:provider/provider.dart';
 
 import '../../../res.dart';
 import 'dart:convert';
@@ -33,6 +36,7 @@ class _WalletState extends State<Wallet> {
 
   @override
   Widget build(BuildContext context) {
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
     return Scaffold(
       backgroundColor: MyColors.greyWhite,
       appBar: PreferredSize(
@@ -40,8 +44,9 @@ class _WalletState extends State<Wallet> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("wallet"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("wallet"), style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold)),
               // leading: IconButton(
               //   icon: Icon(Icons.arrow_back_ios),
               //   onPressed: () {
@@ -68,7 +73,13 @@ class _WalletState extends State<Wallet> {
         ),
       ),
       
-      body: ListView(
+      body:
+
+      visitorProvider.visitor?
+
+      Visitor()
+
+          : ListView(
         padding: EdgeInsets.symmetric(vertical: 30,horizontal: 15),
         children: [
           Image(
@@ -138,7 +149,7 @@ class _WalletState extends State<Wallet> {
           });
 
         } else {
-          Fluttertoast.showToast(msg: responseData["msg"]);
+          // Fluttertoast.showToast(msg: responseData["msg"]);
         }
       }
     } catch (e, t) {

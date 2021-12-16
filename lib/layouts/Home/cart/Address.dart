@@ -14,6 +14,7 @@ import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/InkWellTextField.dart';
 import 'package:nava/helpers/customs/LabelTextField.dart';
 import 'package:nava/helpers/models/RegionsModel.dart';
+import 'package:nava/helpers/models/TimesModel.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../res.dart';
@@ -43,9 +44,9 @@ class _AddressState extends State<Address> {
   TextEditingController time=new TextEditingController();
   TextEditingController mapAddress=new TextEditingController();
   TextEditingController neighbor=new TextEditingController();
-  TextEditingController street=new TextEditingController();
-  TextEditingController house=new TextEditingController();
-  TextEditingController floor=new TextEditingController();
+  // TextEditingController street=new TextEditingController();
+  // TextEditingController house=new TextEditingController();
+  // TextEditingController floor=new TextEditingController();
   TextEditingController notes=new TextEditingController();
 
   @override
@@ -62,8 +63,9 @@ class _AddressState extends State<Address> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("address"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("address"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -118,13 +120,16 @@ class _AddressState extends State<Address> {
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Text(tr("time"),),
                 ),
+
+                //اضافة الاوقات كل نص ساعه
+
                 InkWellTextField(
                   controller: time,
-                  label: myTime??tr("selectTime"),
+                  label: selectedTime??tr("selectTime"),
                   icon: Icon(CupertinoIcons.time,color: MyColors.accent,size: 26,),
                   margin: EdgeInsets.symmetric(vertical: 8),
                   onTab: (){
-                    openTimePicker();
+                    openTimes();
                   },
                 ),
 
@@ -145,11 +150,11 @@ class _AddressState extends State<Address> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Text(tr("neighbor"),),
+                  child: Text(tr("city"),),
                 ),
                 InkWellTextField(
                   controller: neighbor,
-                  label: selectedNeighbor ?? tr("neighbor"),
+                  label: selectedNeighbor ?? tr("selectCity"),
                   icon: Icon(Icons.expand_more,color: MyColors.accent,size: 30,),
                   margin: EdgeInsets.symmetric(vertical: 8),
                   onTab: (){
@@ -157,37 +162,38 @@ class _AddressState extends State<Address> {
                   },
                 ),
 
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Text(tr("street"),),
-                ),
-                LabelTextField(
-                  controller: street,
-                  label: tr("street"),
-                  action: TextInputAction.next,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Text(tr("house"),),
-                ),
-                LabelTextField(
-                  controller: house,
-                  label: tr("house"),
-                  action: TextInputAction.next,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Text(tr("floor"),),
-                ),
-                LabelTextField(
-                  controller: floor,
-                  label: tr("floor"),
-                  action: TextInputAction.next,
-                  type: TextInputType.number,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 5),
+                //   child: Text(tr("street"),),
+                // ),
+                // LabelTextField(
+                //   controller: street,
+                //   label: tr("street"),
+                //   action: TextInputAction.next,
+                //   margin: EdgeInsets.symmetric(vertical: 8),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 5),
+                //   child: Text(tr("house"),),
+                // ),
+                // LabelTextField(
+                //   controller: house,
+                //   label: tr("house"),
+                //   type: TextInputType.number,
+                //   action: TextInputAction.next,
+                //   margin: EdgeInsets.symmetric(vertical: 8),
+                // ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 5),
+                //   child: Text(tr("floor"),),
+                // ),
+                // LabelTextField(
+                //   controller: floor,
+                //   label: tr("floor"),
+                //   action: TextInputAction.next,
+                //   type: TextInputType.number,
+                //   margin: EdgeInsets.symmetric(vertical: 8),
+                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Text(tr("notes"),),
@@ -254,6 +260,7 @@ class _AddressState extends State<Address> {
         );
       },
     ).then((pickedDate) {
+      getTimes();
       setState(() {
         selectedDate = pickedDate;
         myDate = f.format(pickedDate);
@@ -261,35 +268,35 @@ class _AddressState extends State<Address> {
     });
   }
 
-  TimeOfDay lateTime;
-  String myTime;
-  openTimePicker() {
-    return showDialog(
-      context: context,
-      barrierColor: MyColors.offPrimary.withOpacity(.1),
-      builder: (c) {
-        return TimePickerTheme(
-            data: TimePickerThemeData(
-                backgroundColor: MyColors.white,
-                dayPeriodTextColor: MyColors.black,
-                helpTextStyle: TextStyle(color: MyColors.primary),
-                dialTextColor: MyColors.primary,
-                dialBackgroundColor: MyColors.accent,
-                dialHandColor: MyColors.white
-            ),
-            child: TimePickerDialog(
-              initialTime: TimeOfDay.now(),
-              initialEntryMode: TimePickerEntryMode.dial,
-            )
-        );
-      },
-    ).then((pickedTime) {
-      setState(() {
-        lateTime = pickedTime;
-        myTime = pickedTime.format(context);
-      });
-    });
-  }
+  // TimeOfDay lateTime;
+  // String myTime;
+  // openTimePicker() {
+  //   return showDialog(
+  //     context: context,
+  //     barrierColor: MyColors.offPrimary.withOpacity(.1),
+  //     builder: (c) {
+  //       return TimePickerTheme(
+  //           data: TimePickerThemeData(
+  //               backgroundColor: MyColors.white,
+  //               dayPeriodTextColor: MyColors.black,
+  //               helpTextStyle: TextStyle(color: MyColors.primary),
+  //               dialTextColor: MyColors.primary,
+  //               dialBackgroundColor: MyColors.accent,
+  //               dialHandColor: MyColors.white
+  //           ),
+  //           child: TimePickerDialog(
+  //             initialTime: TimeOfDay.fromDateTime(DateTime.now().add(Duration(hours: 1))),
+  //             initialEntryMode: TimePickerEntryMode.dial,
+  //           )
+  //       );
+  //     },
+  //   ).then((pickedTime) {
+  //     setState(() {
+  //       lateTime = pickedTime;
+  //       myTime = pickedTime.format(context);
+  //     });
+  //   });
+  // }
 
   String selectedNeighbor;
   String selectedRegionId;
@@ -300,7 +307,7 @@ class _AddressState extends State<Address> {
       builder: (BuildContext context) {
         return CupertinoActionSheet(
           title: Center(
-              child: Text(tr("selectRegion"),style: GoogleFonts.almarai(fontSize: 18,color: MyColors.offPrimary,fontWeight: FontWeight.bold),)),
+              child: Text(tr("selectCity"),style: GoogleFonts.almarai(fontSize: 18,color: MyColors.offPrimary,fontWeight: FontWeight.bold),)),
           actions: <Widget>[
             Container(
               height: 300,
@@ -338,6 +345,87 @@ class _AddressState extends State<Address> {
     );
   }
 
+
+
+
+
+
+  String selectedTime;
+  openTimes(){
+    return showCupertinoModalPopup(
+      barrierDismissible: true,
+      context: context,
+      builder: (BuildContext context) {
+        return CupertinoActionSheet(
+          title: Center(
+              child: Text(tr("selectTime"),style: GoogleFonts.almarai(fontSize: 18,color: MyColors.offPrimary,fontWeight: FontWeight.bold),)),
+          actions: <Widget>[
+            Container(
+              height: 300,
+              child: timesModel.data == null
+                  ? Center(
+                child: Text(tr("noAvTimes"),),
+              )
+                  :
+              ListView.builder(
+                itemCount:
+                timesModel.data.length,
+                itemBuilder: (c, i) {
+                  return Column(
+                    children: [
+                      FlatButton(
+                        child: Text(timesModel.data[i]),
+                        onPressed: () {
+                          setState(() {
+                            selectedTime = timesModel.data[i];
+                          });
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      Divider(
+                        height: 0,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  TimesModel timesModel = TimesModel();
+  Future getTimes() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final url = Uri.https(URL, "api/hours-range");
+    try {
+      final response = await http.post(url,
+        body: {"lang": preferences.getString("lang"),
+          "date":myDate
+        },
+      ).timeout(Duration(seconds: 10), onTimeout: () =>throw 'no internet please connect to internet');
+      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        if (responseData["key"] == "success") {
+          timesModel= TimesModel.fromJson(responseData);
+        } else {
+          Fluttertoast.showToast(msg: responseData["msg"]);
+        }
+      }
+    } catch (e,t) {
+      print("error $e" + " ==>> track $t");
+    }
+  }
+
+
+
+
+
+
+
+
   RegionsModel regionsModel = RegionsModel();
   Future getRegions() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -374,14 +462,15 @@ class _AddressState extends State<Address> {
       "lang": preferences.getString("lang"),
       "order_id": widget.orderId.toString(),
       "date":myDate,
-      "time":lateTime!=null?"${lateTime.hour}:${lateTime.minute}:00":null,
+      "time": selectedTime,
+      // lateTime!=null?"${lateTime.hour}:${lateTime.minute}:00":null,
       "lat":lat.toString(),
       "lng":lng.toString(),
       "address":address,
       "region_id":selectedRegionId,
-      "floor":floor.text,
-      "residence":house.text,
-      "street":street.text,
+      // "floor":"floor",
+      // "residence":"house",
+      // "street":"street",
       "address_notes":notes.text==""?null:notes.text,
     });
     dioBase.post("addDateAndAddress", body: bodyData, headers: headers)

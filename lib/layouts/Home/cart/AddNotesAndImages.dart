@@ -6,9 +6,13 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:flutter_sound/public/flutter_sound_player.dart';
+import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:nava/appTest/record_audio.dart';
 import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
@@ -16,8 +20,9 @@ import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/LabelTextField.dart';
 import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../res.dart';
 
 class AddNotesAndImages extends StatefulWidget {
@@ -31,6 +36,101 @@ class AddNotesAndImages extends StatefulWidget {
 
 class _AddNotesAndImagesState extends State<AddNotesAndImages> {
   TextEditingController _notes = new TextEditingController();
+
+
+  Codec _codec = Codec.aacMP4;
+  String _mPath = 'tau_file.mp4';
+  String audioPath ;
+  FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
+  FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
+  bool _mPlayerIsInited = false;
+  bool _mRecorderIsInited = false;
+  bool _mplaybackReady = false;
+
+  @override
+  void initState() {
+    _mPlayer.openAudioSession().then((value) {
+      setState(()=>_mPlayerIsInited = true);
+    });
+    openTheRecorder().then((value) {
+      setState(()=>_mRecorderIsInited = true);
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _mPlayer.closeAudioSession();
+    _mPlayer = null;
+    _mRecorder.closeAudioSession();
+    _mRecorder = null;
+    super.dispose();
+  }
+
+  Future<void> openTheRecorder() async {
+    print("----------------- open 01 -----------------");
+    if (!kIsWeb) {
+      print("----------------- open 02 -----------------");
+      var status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        print("----------------- open 03 not granted -----------------");
+        throw RecordingPermissionException('Microphone permission not granted');
+      }
+    }
+    await _mRecorder.openAudioSession();
+    if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
+      _codec = Codec.opusWebM;
+      _mPath = 'tau_file.webm';
+      if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
+        _mRecorderIsInited = true;
+        return;
+      }
+    }
+    _mRecorderIsInited = true;
+  }
+
+  void record() {
+    _mRecorder.startRecorder(
+      toFile: _mPath,
+      codec: _codec,
+      audioSource: theSource,
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
+  void stopRecorder() async {
+    await _mRecorder.stopRecorder().then((value) {
+      setState(() {
+        audioPath = value;
+        _mplaybackReady = true;
+      });
+    });
+  }
+
+  void play() {
+    assert(_mPlayerIsInited && _mplaybackReady && _mRecorder.isStopped && _mPlayer.isStopped);
+    _mPlayer.startPlayer(
+        fromURI: _mPath,
+        codec: kIsWeb ? Codec.opusWebM : Codec.aacADTS,
+        whenFinished: () {
+          setState(() {});
+          print("--------------- $_mPath -------------");
+          print("--------------- $_mPath -------------");
+          print("--------------- $_mPath -------------");
+          print("--------------- ${Codec.values} -------------=)))))))))))))))))))))))))");
+        })
+        .then((value) {
+      setState(() {});
+    });
+  }
+  void stopPlayer() {
+    _mPlayer.stopPlayer().then((value) {
+      setState(() {});
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,8 +140,9 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
-              title: Text(tr("addNotesAndImages"), style: TextStyle(fontSize: 16,fontWeight: FontWeight.normal)),
+              title: Text(tr("addNotesAndImages"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
               leading: IconButton(
                 icon: Icon(Icons.arrow_back_ios),
                 onPressed: () {
@@ -95,13 +196,44 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
                       _openImagePicker(context);
                     }
                   ),
-                  addItem(
-                      title: audioPath !=null ? tr("voiceAdded"):tr("addVoice"),
-                      icon: Icons.mic,
-                    onTap: (){
-                      getAudio();
-                    }
+
+                  Column(
+                    children: [
+                      Container(
+                        width: 130,height: 60,
+                        decoration: BoxDecoration(
+                            color: MyColors.primary,
+                            border: Border.all(),
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            InkWell(
+                                onTap: (){
+                                  record();
+                                },
+                                child: Icon(Icons.mic,size: 30,
+                                  color: _mRecorder.isRecording?MyColors.red:MyColors.black,
+                                )),
+                            InkWell(
+                                onTap: (){
+                                  stopRecorder();
+                                },
+                                child: Icon(Icons.stop,size: 30,
+                                  color: _mRecorder.isRecording ? MyColors.black:MyColors.black.withOpacity(.4),
+                                )),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(_mPath !=null ? tr("voiceAdded"):tr("recordVoiceNote")
+                          ,style: TextStyle(fontSize: 13),),
+                      ),
+                    ],
                   ),
+
                   addItem(
                       title: videoFile!=null ?tr("videoAdded") :tr("addVid"),
                       icon: Icons.videocam,
@@ -112,16 +244,62 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
                 ],
               ),
             ),
+
+
+
+            _mplaybackReady ?
+                InkWell(
+                  onTap: (){
+                    if(_mPlayer.isPlaying){
+                      stopPlayer();
+                    }else{play();}
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.only(top: 8),
+                    decoration: BoxDecoration(border: Border.all(),
+                    borderRadius: BorderRadius.circular(10)),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              _mPlayer.isPlaying? Icons.pause
+                                  : Icons.play_arrow,
+                              size: 30,),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Text(tr("playAudio")),
+                            ),
+                          ],
+                        ),
+
+                        // Row(
+                        //   children: [
+                        //     Icon(Icons.play_arrow),
+                        //     Text(tr("playAudio")),
+                        //   ],
+                        // ),
+
+                      ],
+                    ),
+                  ),
+                )
+                :Container(),
+
+
+
+
             Spacer(),
             CustomButton(
               margin: EdgeInsets.symmetric(vertical: 20),
               title: tr("continueOrder"),
               onTap: () {
-                if(_notes.text!=""){
+                // if(_notes.text!=""){
                   addNotes();
-                }else{
-                  Fluttertoast.showToast(msg: tr("plzAddNotes"));
-                }
+                // }else{
+                //   Fluttertoast.showToast(msg: tr("plzAddNotes"));
+                // }
               },
             ),
           ],
@@ -217,20 +395,20 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
   }
 
 
-  String audioPath;
-  FilePickerResult filePickerResult;
-  getAudio() async {
-    filePickerResult = await FilePicker.platform.pickFiles(
-      type: FileType.audio,
-    ).then((value) {
-      setState(() {
-        audioPath = value.names[0];
-        // audioFile = value.files[0];
-      });
-      return value;
-    });
-    // String fileName = fil.path.split('/').last;
-  }
+  // String audioPath;
+  // FilePickerResult filePickerResult;
+  // getAudio() async {
+  //   filePickerResult = await FilePicker.platform.pickFiles(
+  //     type: FileType.audio,
+  //   ).then((value) {
+  //     setState(() {
+  //       audioPath = value.names[0];
+  //       // audioFile = value.files[0];
+  //     });
+  //     return value;
+  //   });
+  //   // String fileName = fil.path.split('/').last;
+  // }
 
   File videoFile;
   final videoPicker = ImagePicker();
@@ -299,7 +477,7 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
     LoadingDialog.showLoadingDialog();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     Map<String, String> headers = {"Authorization": "Bearer ${preferences.getString("token")}"};
-    print("----------audio > $filePickerResult");
+    print("----------audio > $_mPath");
     print(" ----------image > $imageFile");
     print(" ----------video > $videoFile");
     FormData bodyData = FormData.fromMap({
@@ -308,8 +486,18 @@ class _AddNotesAndImagesState extends State<AddNotesAndImages> {
       "order_id": "${widget.id}",
       "image": imageFile == null ? null : MultipartFile.fromFileSync(imageFile.path,
           filename: "${imageFile.path.split('/').last}"),
-      "audio": filePickerResult == null ? null : MultipartFile.fromFileSync(filePickerResult.paths[0],
-          filename: "${filePickerResult.paths[0].split('/').last}"),
+
+
+
+
+
+      "audio": audioPath == null ? null : MultipartFile.fromFileSync(audioPath,
+          filename: "${audioPath.split('/').last}"),
+
+
+
+
+
       "video": videoFile == null ? null : MultipartFile.fromFileSync(videoFile.path,
           filename: "${videoFile.path.split('/').last}"),
     });

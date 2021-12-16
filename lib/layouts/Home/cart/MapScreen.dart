@@ -98,7 +98,8 @@ class _MapScreenState extends State<MapScreen> {
       ImageConfiguration(
         size: Size(20, 20),
         devicePixelRatio: 0,
-      ), 'assets/images/marker.png',
+      ),
+      'assets/images/marker.png',
     ).then((onValue) {
       myIcon = onValue;
     });
@@ -112,7 +113,8 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr("selectLocation"),style: TextStyle(color: MyColors.white),),
+        backgroundColor: MyColors.primary,
+        title: Text(tr("selectLocation"),style: TextStyle(color: MyColors.white,fontSize: 18),),
         iconTheme: IconThemeData(color: MyColors.white),
         leading: InkWell(
           onTap: (){
@@ -127,23 +129,19 @@ class _MapScreenState extends State<MapScreen> {
           : Column(
             children: [
               Container(
-                  height: MediaQuery.of(context).size.height*.81,
+                  height: MediaQuery.of(context).size.height*.8,
                   width: MediaQuery.of(context).size.width,
                   child: Stack(
                     children: <Widget>[
                       GoogleMap(
                         mapType: MapType.normal,
-                        initialCameraPosition: CameraPosition(
-                            target: LatLng(currentLat, currentLng),
-                            zoom: 15.0),
+                        initialCameraPosition: CameraPosition(target: LatLng(currentLat, currentLng), zoom: 15.0),
                         onTap: (newLang) {
                           currentLat = updatedPosition.latitude;
                           currentLng = updatedPosition.longitude;
                           },
                           onMapCreated: _onMapCreated,
                           onCameraMove: ((_position) => _updatePosition(_position)),
-
-
                       ),
                       Align(
                           alignment: Alignment.center,
@@ -219,7 +217,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _confirmButton(BuildContext context) {
     return CustomButton(
-      margin: EdgeInsets.symmetric(horizontal: 20,vertical: 12),
+      margin: EdgeInsets.only(left: 20,right: 20,bottom: 15),
       color: MyColors.white,
       title: tr("chooseCurrentLocation"),
       borderColor: MyColors.primary,

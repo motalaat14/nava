@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
 import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Loading.dart';
@@ -8,6 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/base.dart';
 import 'package:http/http.dart' as http;
+import 'package:nava/helpers/providers/visitor_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'SubCategoryDetails.dart';
@@ -35,15 +38,20 @@ class _SubCategoriesState extends State<SubCategories> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: MyColors.primary,
         elevation: 0,
-        title: Text(widget.name),
+        title: Text(widget.name,style: TextStyle(fontSize: 18),),
         actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Image(
-                image: NetworkImage(widget.img),
-                color: MyColors.black,
-                width: 25),
+          Container(
+            width: 50,
+            height: 40,
+            decoration: BoxDecoration(
+                // border: Border.all(width: .5),
+                borderRadius: BorderRadius.circular(5),
+                image: DecorationImage(image: NetworkImage(widget.img),fit: BoxFit.cover)
+            ),
+            margin: const EdgeInsets.only(top: 10,left: 15,right: 15),
+            padding: const EdgeInsets.all(18),
           ),
         ],
       ),
@@ -51,7 +59,7 @@ class _SubCategoriesState extends State<SubCategories> {
         children: [
           AppBarFoot(),
           Container(
-            height: MediaQuery.of(context).size.height * .88,
+            height: MediaQuery.of(context).size.height * .87,
             child:
             loading? MyLoading() :
             ListView.builder(
@@ -76,9 +84,16 @@ class _SubCategoriesState extends State<SubCategories> {
     );
   }
 
+
+
   Widget subCategoryItem({int id,img, title}) {
+
     return InkWell(
       onTap: (){
+        VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
+        visitorProvider.visitor ?
+        LoadingDialog.showAuthDialog(context: context)
+            :
         Navigator.of(context).push(MaterialPageRoute(builder: (c) => SubCategoryDetails(id: id,categoryId: widget.id, name: title, img: img)));
       },
       child: Container(

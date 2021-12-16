@@ -8,6 +8,7 @@ import 'package:nava/helpers/constants/MyColors.dart';
 import 'package:nava/helpers/customs/Badge.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/layouts/auth/splash/Splash.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -22,49 +23,8 @@ class _LangScreenState extends State<LangScreen> {
   @override
   void initState() {
     initLang();
-    // getNotificationCount();
     super.initState();
   }
-
-  int count = 0;
-  // Future getNotificationCount() async {
-  //   SharedPreferences preferences = await SharedPreferences.getInstance();
-  //   final url = Uri.https(URL, "api/unread-notifications-count");
-  //   try {
-  //     final response = await http.post(url, body: {
-  //       "lang": "${preferences.getString("lang")}"
-  //     }, headers: {
-  //       "Authorization": "Bearer ${preferences.getString("token")}"
-  //     }).timeout(
-  //       Duration(seconds: 7),
-  //       onTimeout: () {
-  //         throw 'no internet please connect to internet';
-  //       },
-  //     );
-  //     final responseData = json.decode(response.body);
-  //     if (response.statusCode == 200) {
-  //       print(responseData);
-  //       if (responseData["key"] == "success") {
-  //         setState(() {
-  //           count = responseData["data"]["count"];
-  //         });
-  //         print(
-  //             "---------------------------------------success notifications count");
-  //         print(count);
-  //         print(
-  //             "---------------------------------------success notifications count");
-  //       } else {
-  //         // Fluttertoast.showToast(
-  //         //   msg: responseData["msg"],
-  //         //   toastLength: Toast.LENGTH_SHORT,
-  //         //   gravity: ToastGravity.CENTER,
-  //         // );
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print("fail 222222222   $e}");
-  //   }
-  // }
 
   String lang;
   bool ar = true;
@@ -95,98 +55,95 @@ class _LangScreenState extends State<LangScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(
-          tr("appLang"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
+        backgroundColor: MyColors.primary,
+        elevation: 0,
+        title: Text(tr("appLang"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        iconTheme: IconThemeData(color: MyColors.primary),
         actions: [
           InkWell(
             onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
+              Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Badge(
-                  value: "3",
-                  color: MyColors.red,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.notifications,
-                      color: MyColors.offPrimary,
-                      size: 28,
-                    ),
-                    onPressed: () {
-                      // Navigator.push(context, MaterialPageRoute(builder: (c) => Notifications()));
-                    },
-                  )),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Image(
+                image: ExactAssetImage(Res.contactus),
+                width: 26,
+              ),
             ),
-          ),
+          )
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(top: 20),
-          child: Column(
-            children: [
-              Text(
-                tr("appLang"),
-                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: MyColors.offPrimary),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  tr("plzSelectLang"),
-                  style: TextStyle(fontSize: 16,color: MyColors.primary),
+      body: Container(
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Column(
+              children: [
+                Text(
+                  tr("appLang"),
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold,color: MyColors.offPrimary),
                 ),
-              ),
-              InkWell(
-                  onTap: () {
-                    if (!ar) {
-                      setState(() {
-                        ar = true;
-                        lang="ar";
-                      });
-                    }
-                    print(lang);
-                  },
-                  child: langItem(
-                    lang: "اللغة العربية",
-                    img: Res.saudiarabia,
-                    selected: ar,
-                  )),
-              InkWell(
-                  onTap: () {
-                    if (ar) {
-                      setState(() {
-                        ar = false;
-                        lang="en";
-                      });
-                    }
-                    print(lang);
-                  },
-                  child: langItem(
-                    lang: "English",
-                    img: Res.usa,
-                    selected: !ar,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    tr("plzSelectLang"),
+                    style: TextStyle(fontSize: 16,color: MyColors.primary),
                   ),
-              ),
-              Spacer(),
-              CustomButton(
-                margin: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
-                  title: tr("confirm"),
-                  onTap: (){
-                  changeLangPref(newLang: lang);
-                  Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => Splash()),
-                          (route) => false);
-                  Fluttertoast.showToast(
-                    msg: tr("langChanged"),
-                  );
-                  },
-              )
-            ],
+                ),
+                InkWell(
+                    onTap: () {
+                      if (!ar) {
+                        setState(() {
+                          ar = true;
+                          lang="ar";
+                        });
+                      }
+                      print(lang);
+                    },
+                    child: langItem(
+                      lang: "اللغة العربية",
+                      img: Res.saudiarabia,
+                      selected: ar,
+                    )),
+                InkWell(
+                    onTap: () {
+                      if (ar) {
+                        setState(() {
+                          ar = false;
+                          lang="en";
+                        });
+                      }
+                      print(lang);
+                    },
+                    child: langItem(
+                      lang: "English",
+                      img: Res.usa,
+                      selected: !ar,
+                    ),
+                ),
+                Spacer(),
+                CustomButton(
+                  margin: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
+                    title: tr("confirm"),
+                    onTap: (){
+                    changeLangPref(newLang: lang);
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => Splash()),
+                            (route) => false);
+                    Fluttertoast.showToast(
+                      msg: tr("langChanged"),
+                    );
+                    },
+                )
+              ],
+            ),
           ),
         ),
       ),

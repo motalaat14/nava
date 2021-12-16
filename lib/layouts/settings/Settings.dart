@@ -13,6 +13,7 @@ import 'package:nava/helpers/constants/base.dart';
 import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/providers/FcmTokenProvider.dart';
 import 'package:nava/helpers/providers/UserProvider.dart';
+import 'package:nava/helpers/providers/visitor_provider.dart';
 import 'package:nava/layouts/Home/Home.dart';
 import 'package:nava/layouts/auth/splash/Splash.dart';
 import 'package:nava/layouts/settings/notifications/Notifications.dart';
@@ -21,6 +22,7 @@ import 'package:nava/layouts/settings/repeated_questions/RepeatedQuestions.dart'
 import 'package:nava/layouts/settings/terms/Terms.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../res.dart';
 import 'about_us/AboutUs.dart';
 import 'contact_us/ContactUs.dart';
 import 'lang/LangScreen.dart';
@@ -40,11 +42,20 @@ class _SettingsState extends State<Settings> {
   String img="";
   initData()async{
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    setState(() {
-      name=preferences.getString("name");
-      phone=preferences.getString("phone");
-      img=preferences.getString("image");
-    });
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
+    if(visitorProvider.visitor){
+      setState(() {
+        name="";
+        phone=tr("notLogin");
+        img="";
+      });
+    }else {
+      setState(() {
+        name=preferences.getString("name");
+        phone=preferences.getString("phone");
+        img=preferences.getString("image");
+      });
+    }
   }
   @override
   void initState(){
@@ -53,12 +64,15 @@ class _SettingsState extends State<Settings> {
   }
   @override
   Widget build(BuildContext context) {
+    VisitorProvider visitorProvider = Provider.of<VisitorProvider>(context,listen: false);
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(MediaQuery.of(context).size.width, 75),
         child: Column(
           children: [
             AppBar(
+              backgroundColor: MyColors.primary,
               elevation: 0,
               title:
               Padding(
@@ -74,7 +88,9 @@ class _SettingsState extends State<Settings> {
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(),
-                              image: DecorationImage(image: NetworkImage(img),fit: BoxFit.cover)),
+                              image: DecorationImage(
+                                  image: img==""?ExactAssetImage(Res.login,):NetworkImage(img),
+                                  fit: BoxFit.cover,)),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -101,7 +117,9 @@ class _SettingsState extends State<Settings> {
                 ),
               ),
               actions: [
-                InkWell(onTap: ()=>logout(), child: Padding(
+                visitorProvider.visitor ?
+                    Container()
+                    : InkWell(onTap: ()=>logout(), child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Icon(Mdi.logout,size: 36,color: MyColors.red,),
                 )),//red
@@ -120,12 +138,19 @@ class _SettingsState extends State<Settings> {
             onTap: (){Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (c)=>Home(index: 0,)), (route) => false);},
           ),
           moreItem(title: tr("profile"),icon: Mdi.accountOutline,
-              onTap: (){Navigator.push(context, MaterialPageRoute(builder: (c)=>Profile(
+              onTap: (){
+                visitorProvider.visitor ?
+                    LoadingDialog.showAuthDialog(context: context)
+                    : Navigator.push(context, MaterialPageRoute(builder: (c)=>Profile(
                 img: "img",name: "name",phone: "phone",email: "email",
-              )));},
+              )));
+            },
           ),
           moreItem(title: tr("noti"),icon: CupertinoIcons.bell,
-            onTap: (){Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));},
+            onTap: (){
+              visitorProvider.visitor ?
+              LoadingDialog.showAuthDialog(context: context)
+                  : Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));},
           ),
           moreItem(title: tr("lang"),icon: Mdi.web,
             onTap: (){Navigator.push(context, MaterialPageRoute(builder: (c)=>LangScreen()));},

@@ -6,10 +6,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nava/helpers/constants/DioBase.dart';
 import 'package:nava/helpers/constants/LoadingDialog.dart';
 import 'package:nava/helpers/constants/MyColors.dart';
+import 'package:nava/helpers/customs/AppBarFoot.dart';
 import 'package:nava/helpers/customs/Badge.dart';
 import 'package:nava/helpers/customs/CustomButton.dart';
 import 'package:nava/helpers/customs/RichTextFiled.dart';
+import 'package:nava/layouts/settings/contact_us/ContactUs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../res.dart';
 
 class ChangePassword extends StatefulWidget {
   @override
@@ -29,79 +33,87 @@ class _ChangePasswordState extends State<ChangePassword> {
     return Scaffold(
       key: _scaffold,
       backgroundColor: MyColors.secondary,
-      appBar: AppBar(
-        backgroundColor: MyColors.white,
-        title: Text(tr("changePass"),
-          style: TextStyle(color: MyColors.primary, fontSize: 16),
-        ),
-        iconTheme: IconThemeData(color: MyColors.primary),
-        // actions: [InkWell(
-        //     onTap: (){
-        //       Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));
-        //     },
-        //     child: Padding(
-        //       padding: const EdgeInsets.symmetric(horizontal: 10),
-        //       child: Badge(
-        //           value: "3",
-        //           color: MyColors.red,
-        //           child: IconButton(
-        //             icon: Icon(
-        //               Icons.notifications,
-        //               color: MyColors.offPrimary,
-        //               size: 28,
-        //             ),
-        //             onPressed: () {
-        //               Navigator.push(context, MaterialPageRoute(builder: (c)=>Notifications()));
-        //             },
-        //           )),
-        //     ),
-        //   ),],
-      ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(tr("oldPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-              RichTextFiled(
-                controller: oldPass,
-                label: tr("oldPass"),
-                type: TextInputType.text,
-                margin: EdgeInsets.only(top: 8,bottom: 10),
-                action: TextInputAction.next,
-              ),
-              Text(tr("newPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-              RichTextFiled(
-                controller: newPass,
-                label: tr("newPass"),
-                type: TextInputType.text,
-                margin: EdgeInsets.only(top: 8,bottom: 10),
-                action: TextInputAction.next,
-              ),
-              Text(tr("confirmPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
-              RichTextFiled(
-                controller: newPass2,
-                label: tr("confirmPass"),
-                type: TextInputType.text,
-                margin: EdgeInsets.only(top: 8,bottom: 10),
-                action: TextInputAction.done,
-              ),
-
-              Spacer(),
-              CustomButton(
-                title: tr("confirm"),
-                margin: EdgeInsets.symmetric(vertical: 0),
-                onTap: (){
-                  if(newPass.text != newPass2.text){
-                    Fluttertoast.showToast(msg: tr("unMatchPass"));
-                  }else{
-                    changePassword();
-                  }
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 75),
+        child: Column(
+          children: [
+            AppBar(
+              backgroundColor: MyColors.primary,
+              elevation: 0,
+              title: Text(tr("changePass"), style: TextStyle(fontSize: 18,fontWeight: FontWeight.normal)),
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  Navigator.pop(context);
                 },
               ),
-            ],
+              actions: [
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (c) => ContactUs()));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image(
+                      image: ExactAssetImage(Res.contactus),
+                      width: 26,
+                    ),
+                  ),
+                )
+              ],
+            ),
+            AppBarFoot(),
+          ],
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(image: DecorationImage(image: ExactAssetImage(Res.splash),fit: BoxFit.cover)),
+        child: Form(
+          key: _formKey,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(tr("oldPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                RichTextFiled(
+                  controller: oldPass,
+                  label: tr("oldPass"),
+                  type: TextInputType.text,
+                  margin: EdgeInsets.only(top: 8,bottom: 10),
+                  action: TextInputAction.next,
+                ),
+                Text(tr("newPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                RichTextFiled(
+                  controller: newPass,
+                  label: tr("newPass"),
+                  type: TextInputType.text,
+                  margin: EdgeInsets.only(top: 8,bottom: 10),
+                  action: TextInputAction.next,
+                ),
+                Text(tr("confirmPass"),style: TextStyle(fontSize: 15,color: MyColors.grey),),
+                RichTextFiled(
+                  controller: newPass2,
+                  label: tr("confirmPass"),
+                  type: TextInputType.text,
+                  margin: EdgeInsets.only(top: 8,bottom: 10),
+                  action: TextInputAction.done,
+                ),
+
+                Spacer(),
+                CustomButton(
+                  title: tr("confirm"),
+                  margin: EdgeInsets.symmetric(vertical: 0),
+                  onTap: (){
+                    if(newPass.text != newPass2.text){
+                      Fluttertoast.showToast(msg: tr("unMatchPass"));
+                    }else{
+                      changePassword();
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

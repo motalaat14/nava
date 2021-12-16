@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
